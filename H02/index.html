@@ -76,24 +76,35 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 <p style="margin:0">前回作った <strong>DesignPrinciples2026</strong> プロジェクトをそのまま使います。メニューバーの <strong>Assets → Import Package → Custom Package...</strong> でこのファイルを選び、<strong>Import</strong> を押すと <code>Assets/Lessons/H02_CanvasAnchor/</code> に入ります。</p>
 </section>
 
-<p>今日は、ゲームの画面に UI を貼りつける仕組みを手で確かめます。ボタンを 1 つ置き、画面の比率や解像度を変えたときに「消える」「小さくなる」「欠ける」を順に起こしてから、アンカー、Canvas Scaler、セーフエリアの 3 つで直していきます。</p>
-<p>同じ日の 1 コマ目の講義（D02、原理編 第2章「画面とアンカー」）で聞いた話を、ここでは自分の手で再現します。</p>
+<p>今日は、ゲームの画面に UI を貼りつける仕組みを手で確かめます。ボタンを 1 つ置き、画面の比率や解像度を変えたときに「消える」「欠ける」「小さくなる」といった事故を起こしてから、アンカー、セーフエリア、Canvas Scaler で直していきます。</p>
+<p>同じ日の 1 コマ目の講義（D02、原理編 第2章「画面とアンカー」）で聞いた話を、ここでは自分の手で再現します。章は、前回の講義 D01（第1章）で学んだ三つの層の順に並べています。</p>
 
 <nav class="toc">
 <strong>目次</strong>
-<ol>
-<li><a href="#ch1">Canvas を置く</a></li>
-<li><a href="#ch2">Rect Transform を読む</a></li>
-<li><a href="#ch3">アンカーで画面の隅に固定する</a></li>
-<li><a href="#ch4">Canvas Scaler で大きさを合わせる</a></li>
-<li><a href="#ch5">セーフエリアに収める</a></li>
-<li><a href="#ch6">見切れる画面と付き合ってきた歴史</a></li>
-<li><a href="#ch7">まとめ</a></li>
+<ol start="0">
+<li><a href="#ch0">はじめに：三つの層と土台</a></li>
+<li><a href="#ch1">準備：土台を置く</a></li>
+<li><a href="#ch2">体験の層：押せるか、届くか</a></li>
+<li><a href="#ch3">情報の層：何をどこに、どんな強さで</a></li>
+<li><a href="#ch4">見た目の層：どの画面でも同じ比率に</a></li>
+<li><a href="#ch5">見切れる画面と付き合ってきた歴史</a></li>
+<li><a href="#ch6">まとめ</a></li>
 </ol>
 </nav>
 
-<h2 id="ch1">1. Canvas を置く</h2>
-<p>まず、UI を描くための土台を用意します。ボタンを 1 つ作ると、土台になる Canvas と、クリックを受け付ける EventSystem が一緒に作られます。この章では、その 3 つが何をしているのかを確かめます。</p>
+<h2 id="ch0">0. はじめに：三つの層と土台</h2>
+<p>前回の講義 D01（原理編 第1章）では、ゲームのデザインが扱う範囲を三つの層に分けました。</p>
+<ul>
+<li><strong>体験の層</strong>：操作したときの手応えや迷いにくさ</li>
+<li><strong>情報の層</strong>：何を、どんな順番で、どれくらいの強さで見せるか</li>
+<li><strong>見た目の層</strong>：色、形、レイアウト、フォント</li>
+</ul>
+<p>そして、この三つの層を載せる土台が画面そのものです。ゲームの画面は、機種や設定で解像度もアスペクト比（縦と横の比率）も変わります。土台がずれると、その上の三つの層がまとめて崩れてしまいます。今日の講義 D02（原理編 第2章）は、この土台の話でした。</p>
+<p>この演習では、土台がずれたときに各層で何が壊れるのかを順に見ていきます。体験の層ではボタンが消えたり欠けたりして押せなくなり、情報の層では帯や通知が途中で切れ、見た目の層では UI の大きさの比率が変わります。どの層が壊れたのかが分かれば、直す道具も決まります。</p>
+<p class="note">配布シーンの Ex 番号は Unity で作業しやすい順に付けています。このページは層の順に並べているので、番号が飛ぶところがあります。前提の状態をどのシーンで用意するかは、作例ごとに書いています。</p>
+
+<h2 id="ch1">1. 準備：土台を置く</h2>
+<p>層の話に入る前に、UI を描くための土台を用意します。ボタンを 1 つ作ると、土台になる Canvas と、クリックを受け付ける EventSystem が一緒に作られます。続けて、UI の位置と大きさを決める Rect Transform（レクト トランスフォーム）の欄を読み、1 つだけ値を変えて動きを確かめます。</p>
 
 <h3>ボタンを 1 つ置く</h3>
 <p class="path">Assets/Lessons/H02_CanvasAnchor/Scenes/Ex01_FirstCanvas.unity</p>
@@ -136,9 +147,6 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 </div>
 <p>3D のゲームを作っている途中で UI を触るときは、2D に切り替えて <kbd>F</kbd> を押す、を覚えておくと迷いにくくなります。</p>
 
-<h2 id="ch2">2. Rect Transform を読む</h2>
-<p>UI の部品は、位置と大きさを Transform ではなく Rect Transform（レクト トランスフォーム）で決めます。この章では Inspector の各欄が何を表しているかを読み、1 つだけ値を変えて動きを確かめます。</p>
-
 <h3>Pos X を変えてボタンを動かす</h3>
 <p class="path">Assets/Lessons/H02_CanvasAnchor/Scenes/Ex02_RectTransform.unity</p>
 <p>前の作例と同じボタンの Pos X を 0 から 300 にすると、ボタンが画面の中央から右へ 300 ピクセル動きます。</p>
@@ -177,10 +185,11 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 <p class="check"><strong>確認：</strong>Pos X を 0 と 300 で入れ替えると、ボタンが左右に動くことを確認します。300 のとき、ボタンの中心は画面の左端から 960 + 300 = 1260 ピクセルの位置にあります。</p>
 
 <h4>「0」はどこから測っているか</h4>
-<p>Pos X = 0 が画面の中央になるのは、アンカーが中央（Anchors がすべて 0.5）にあるからです。Rect Transform の位置は、いつも「アンカーから、ピボットまでの距離」で書かれています。次の章では、このアンカーを動かすと同じ Pos X の意味が変わることを確かめます。</p>
+<p>Pos X = 0 が画面の中央になるのは、アンカーが中央（Anchors がすべて 0.5）にあるからです。Rect Transform の位置は、いつも「アンカーから、ピボットまでの距離」で書かれています。次の章では、このアンカーが中央のままだと何が起きるか、そしてアンカーを動かすと同じ Pos X の意味がどう変わるかを確かめます。</p>
 
-<h2 id="ch3">3. アンカーで画面の隅に固定する</h2>
-<p>ここからが今日の中心です。まずアンカーを中央にしたまま画面の形を変え、ボタンが消える事故をわざと起こします。次に、アンカーを動かして同じ事故を防ぎます。</p>
+<h2 id="ch2">2. 体験の層：押せるか、届くか</h2>
+<p>この層で守るのは、プレイヤーが押したいボタンを、どの画面でも見つけて押せることです。画面を縦長にしたら右上のボタンが見当たらない、スマホで遊んだらボタンの角がノッチに隠れて押しにくい、という場面は、どちらも体験の層が壊れた状態です。</p>
+<p>この章では、まずアンカーを中央にしたまま画面の形を変え、ボタンが消える事故をわざと起こします。次にアンカーで右上に留め、最後にスマホのノッチや角丸で欠ける事故を、セーフエリアで防ぎます。</p>
 
 <h3>アンカーが中央のまま右上に置く（事故）</h3>
 <p class="path">Assets/Lessons/H02_CanvasAnchor/Scenes/Ex03_AnchorAccident.unity</p>
@@ -253,9 +262,108 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 </table>
 <p>隅にぴったり付けたいときは Shift + Alt（Option）、今の位置を保ちたいときはそのままクリック、と使い分けると便利です。</p>
 
+<h3>Device Simulator でスマホの画面を見る</h3>
+<p class="path">Assets/Lessons/H02_CanvasAnchor/Scenes/Ex08_DeviceSimulator.unity</p>
+<p>前の作例では、画面の形が変わってもボタンを右上に留められるようにしました。ところがスマホでは、その隅そのものがノッチや角丸で欠けています。画面の隅に部品を置いた HUD を、ノッチのある iPhone の横持ちで表示すると、右上と右下の部品の角が欠けます。</p>
+<p>このシーンには、第3章の「やってみよう」で作る HUD（HP・Score・MiniMap・Message の 4 つ）と、第4章で扱う Canvas Scaler の設定が先に入っています。ここでは大きさの設定は気にせず、端の部品が欠けるかどうかだけを見ます。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>Device Simulator：Game ビューの代わりに、実在するスマホの形と画面で表示する機能です</li>
+<li>セーフエリア（Safe Area）：ノッチや角丸に隠されず、確実に表示される範囲です</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Assets/Lessons/H02_CanvasAnchor/Scenes/Ex08_DeviceSimulator</code> をダブルクリックして開きます</li>
+<li>Game ビュー左上の <strong>Game</strong> と書かれたドロップダウンをクリックし、<strong>Simulator</strong> を選びます</li>
+<li>ツールバーの端末名のドロップダウンをクリックし、<strong>Apple iPhone 12</strong> を選びます</li>
+<li>ツールバーの <strong>Rotate</strong> の矢印ボタンを押して、ノッチが右側に来る横向きにします</li>
+<li>ツールバーの <strong>Safe Area</strong> を押してオンにします（セーフエリアが黄色い枠で表示されます）</li>
+</ol>
+<figure>
+<img src="images/ex08_simulator_landscape.png" alt="Simulator で iPhone 12 を横向きに表示。右側にノッチがあり、右上の SCORE と右下の MAP の角が角丸とノッチに隠れている" loading="lazy">
+<figcaption>Simulator で iPhone 12 の横持ち。右上の SCORE と右下の MAP の角が、角丸に削られています</figcaption>
+</figure>
+<figure>
+<img src="images/ex08_simulator_safearea.png" alt="Safe Area をオンにした Simulator。セーフエリアが黄色い枠で示され、HUD の部品がその外にはみ出している" loading="lazy">
+<figcaption>Safe Area をオンにすると、セーフエリアが黄色い枠で表示されます。HUD の 4 つとも、枠の外にはみ出しています</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>iPhone 12 の横持ちで、画面の端に置いた HUD の部品がセーフエリアの外にはみ出し、角丸やノッチで欠けていることを確認します。</p>
+
+<h4>エディタでは気づけない事故</h4>
+<p>iPhone 12 の画面は 2532 x 1170 ピクセルで、横持ちのセーフエリアは左右に 141 ピクセルずつ、下に 63 ピクセルの欠けがあります。Game ビューの長方形の画面では、この欠けはまったく見えません。原理編の第2章で「エディタで気づけない代表例」とされているのはこのためで、スマホ向けの UI は Simulator で一度は確かめておくと安心です。</p>
+
+<h3>SafeAreaRoot で全体をセーフエリアに収める</h3>
+<p class="path">Assets/Lessons/H02_CanvasAnchor/Scenes/Ex09_SafeAreaRoot.unity</p>
+<p>前の作例と同じ HUD を、Canvas の直下に作った SafeArea というオブジェクトの子にまとめると、Play したときに HUD 全体がセーフエリアの内側に収まります。Ex08_DeviceSimulator のシーンを開いたまま、続けて操作します（配布シーンの Ex09_SafeAreaRoot は、この作例を終えた状態です）。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>SafeArea（空のオブジェクト）：HUD 全体の親になる四角形です</li>
+<li>stretch のプリセット：アンカーを点ではなく辺や範囲に広げます。Anchor Presets の列や行が stretch のマスで選びます</li>
+<li>SafeAreaRoot.cs：端末のセーフエリアを読み取り、SafeArea のアンカーをその範囲に合わせるスクリプトです（配布物の <code>Assets/Lessons/H02_CanvasAnchor/Scripts/</code> にあります）</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Hierarchy で Canvas を右クリックし、<strong>Create Empty</strong> をクリックします（Canvas の子に、Rect Transform 付きの空のオブジェクトができます）</li>
+<li>名前を <code>SafeArea</code> にします（<kbd>Return</kbd>、Windows は <kbd>F2</kbd>）</li>
+<li>Anchor Presets で、列も行も <strong>stretch</strong> の右下のマスを <kbd>Shift</kbd> + <kbd>Alt</kbd>（Mac は <kbd>Option</kbd>）を押しながらクリックします（Left・Top・Right・Bottom がすべて 0 になります）</li>
+<li>Project ウィンドウの <code>SafeAreaRoot.cs</code> を、SafeArea の Inspector の空いているところへドラッグします</li>
+<li>Hierarchy で HP・Score・MiniMap・Message を順に SafeArea の上へドラッグし、SafeArea の子にします</li>
+<li>Simulator のまま Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押します</li>
+</ol>
+<div class="pair">
+<figure><img src="images/ex09_hierarchy.png" alt="Hierarchy。Canvas の子に SafeArea、その子に HP、Score、MiniMap、Message" loading="lazy"><figcaption>HUD の部品をすべて SafeArea の子にします</figcaption></figure>
+<figure><img src="images/ex09_inspector.png" alt="SafeArea の Inspector。Rect Transform は stretch で Left、Top、Right、Bottom が 0、その下に Safe Area Root (Script)" loading="lazy"><figcaption>SafeArea は全面ストレッチにして、Safe Area Root を付けます</figcaption></figure>
+</div>
+<figure>
+<img src="images/ex09_simulator_play_safearea.png" alt="Play 中の Simulator。HUD の 4 つが黄色いセーフエリアの枠の内側に表示されている" loading="lazy">
+<figcaption>Play 中（Safe Area オン）。HUD 全体が黄色い枠の内側、つまりノッチと角丸を避けた範囲に収まりました</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>Play 中、SCORE と MAP がノッチや角丸に欠けずに表示されることを確認します。Safe Area をオンにして、4 つの部品すべてが黄色い枠の内側にあることも見ておきます。確かめたら Play を止めます。</p>
+
+<p>SafeAreaRoot.cs の全文です。配布物に入っているので書き写す必要はありませんが、行ごとの意味を読んでおきましょう。</p>
+<pre><code>using UnityEngine;
+
+/// Canvas 直下に置く。Screen.safeArea をアンカーに反映(回転・解像度変化にも追従)
+public class SafeAreaRoot : MonoBehaviour
+{
+    Rect _applied;
+    void Awake() { Apply(); }
+    void Update() { if (Screen.safeArea != _applied) Apply(); }   // 回転対応
+    void Apply()
+    {
+        _applied = Screen.safeArea;
+        var rt = (RectTransform)transform;
+        rt.anchorMin = new Vector2(_applied.xMin / Screen.width, _applied.yMin / Screen.height);
+        rt.anchorMax = new Vector2(_applied.xMax / Screen.width, _applied.yMax / Screen.height);
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
+    }
+}</code></pre>
+<table>
+<tr><th>行</th><th>していること</th></tr>
+<tr><td><code>Rect _applied;</code></td><td>最後に当てはめたセーフエリアを覚えておく変数です</td></tr>
+<tr><td><code>void Awake() { Apply(); }</code></td><td>シーンが始まったときに 1 回、セーフエリアを当てはめます</td></tr>
+<tr><td><code>void Update() { if (Screen.safeArea != _applied) Apply(); }</code></td><td>毎フレーム、今のセーフエリアが覚えている値と違うかを比べ、違ったときだけ当てはめ直します</td></tr>
+<tr><td><code>_applied = Screen.safeArea;</code></td><td>端末が教えてくれるセーフエリア（ピクセル単位の四角形）を受け取ります</td></tr>
+<tr><td><code>var rt = (RectTransform)transform;</code></td><td>このオブジェクトの Rect Transform を取り出します</td></tr>
+<tr><td><code>rt.anchorMin = ...</code></td><td>セーフエリアの左下の角を画面の幅と高さで割り、0〜1 の割合にしてアンカーの Min に入れます</td></tr>
+<tr><td><code>rt.anchorMax = ...</code></td><td>右上の角も同じように割合にして、アンカーの Max に入れます</td></tr>
+<tr><td><code>rt.offsetMin = rt.offsetMax = Vector2.zero;</code></td><td>端からの余白（Left・Bottom・Right・Top）を 0 にして、アンカーの範囲いっぱいに広げます</td></tr>
+</table>
+<p>iPhone 12 の横持ちなら、Min は 141 ÷ 2532 ≒ 0.056 と 63 ÷ 1170 ≒ 0.054、Max は 2391 ÷ 2532 ≒ 0.944 と 1 になります。Ex04 では 1 点だったアンカーを範囲に広げ、その範囲をスクリプトから端末に合わせて当てはめていることになります。</p>
+
+<h4>Update で毎フレーム比べる理由</h4>
+<p>セーフエリアは、ゲームの途中でも変わります。スマホを縦から横に回したり、パソコンでウィンドウの大きさを変えたりすると、そのたびにノッチの位置や画面の幅が変わるからです。Awake の 1 回だけでは、回転した後に古いセーフエリアのままになってしまいます。</p>
+<p>とはいえ、毎フレーム当てはめ直す必要はありません。四角形どうしの比較はとても軽い処理なので、毎フレーム「変わったか」だけを確かめ、変わったときだけ Apply を呼んでいます。HUD の部品はすべて SafeArea の子なので、親が縮めば子は自分のアンカーに従って内側へ移ります。</p>
+
+<p>この仕組みは、画面を作り始める最初の 1 回目から入れておくのがおすすめです。部品を置いた後から SafeArea の子へ移し替えるより、先に SafeArea を作ってその中に置いていくほうが、手間も事故も少なくなります。</p>
+
+<h2 id="ch3">3. 情報の層：何をどこに、どんな強さで</h2>
+<p>この層で守るのは、読んでほしい情報が、画面が変わってもいつもの場所に、欠けずに見えていることです。画面の幅が変わったらメッセージの帯が途中で途切れた、通知の文字が増えたらパネルが画面の外へはみ出した、という場面では、ボタンは押せても情報が届きません。</p>
+<p>この章では、アンカーを点ではなく辺に広げた帯と、ピボットで伸び方を決めた通知パネルを作ります。最後に「やってみよう」で、HUD の部品を「どの隅の仲間か」で置き分けます。</p>
+
 <h3>左右いっぱいのバーを作る</h3>
 <p class="path">Assets/Lessons/H02_CanvasAnchor/Scenes/Ex05_AnchorStretch.unity</p>
-<p>前の作例ではアンカーを右上の 1 点に置きました。今度はアンカーを下の辺いっぱいに広げると、画面の幅が変わってもバーが左右いっぱいに伸び縮みします。</p>
+<p>Ex04 ではボタンのアンカーを右上の 1 点に置き、Ex09 では SafeArea のアンカーを全面に広げました。今度は同じボタンのある画面で、アンカーを下の辺いっぱいに広げると、画面の幅が変わってもバーが左右いっぱいに伸び縮みします。</p>
 <p class="label">使うもの</p>
 <ul>
 <li>Panel：画面全体を覆う四角い板です。背景や帯に使います</li>
@@ -263,7 +371,8 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 </ul>
 <p class="label">手順</p>
 <ol>
-<li>Game ビューを Full HD (1920x1080) にします</li>
+<li>Play 中なら Play ボタンを押して止めます。Project ウィンドウで <code>Ex04_AnchorTopRight</code> のシーンをダブルクリックして開きます（右上にボタンがある状態です）</li>
+<li>Ex08 で Simulator に切り替えた左上のドロップダウンで <strong>Game</strong> を選んで Game ビューに戻し、Game ビューを Full HD (1920x1080) にします</li>
 <li>Hierarchy で Canvas を右クリックし、<strong>UI (Canvas) → Panel</strong> をクリックします（画面全体を覆う半透明の板ができます）</li>
 <li>Panel が選ばれた状態で <kbd>Return</kbd>（Windows は <kbd>F2</kbd>）を押し、名前を <code>BottomBar</code> にします</li>
 <li>Anchor Presets を開き、列が <strong>stretch</strong>、行が <strong>bottom</strong> のマスを、<kbd>Shift</kbd> + <kbd>Alt</kbd>（Mac は <kbd>Option</kbd>）を押しながらクリックします</li>
@@ -324,14 +433,16 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 <img src="images/ex06_example.png" alt="左上に赤い HP 100、右上に青い SCORE 0000、右下に緑の MAP、下中央に黒い PRESS A TO TALK" loading="lazy">
 <figcaption>作者の一例。4 つの部品は、それぞれ自分が所属する隅にアンカーとピボットを置いています</figcaption>
 </figure>
+<p>部品を置く前に、それぞれの情報が「どの隅の仲間か」を決めておくと、置き場所に迷いにくくなります。いつも目に入っていてほしい情報なのか、必要なときに見に行く情報なのか、という優先度の違いで、置く隅を分けて考えてみましょう。</p>
 <p>これを参考に、部品を増やしたり、置く隅を入れ替えたりしてみましょう。Game ビューを Portrait (1080x1920) に切り替えても崩れないかを確かめながら進めると、アンカーの選び方が身につきます。</p>
 
-<h2 id="ch4">4. Canvas Scaler で大きさを合わせる</h2>
-<p>アンカーで位置は守れるようになりました。ところが解像度が上がると、今度はボタンが小さく見えるという別の事故が起きます。この章では Canvas Scaler で大きさを画面に追従させます。</p>
+<h2 id="ch4">4. 見た目の層：どの画面でも同じ比率に</h2>
+<p>この層で守るのは、作ったときのレイアウトの比率です。1920 x 1080 で整えた HUD が、4K の画面では画面に対して半分の大きさに縮んで見える、という場面では、位置は合っていても、作り手が決めた大きさのバランスが崩れています。</p>
+<p>アンカーで位置は守れるようになりました。この章では Canvas Scaler で、UI の大きさを画面に追従させます。</p>
 
 <h3>解像度が変わっても同じ大きさに見せる</h3>
 <p class="path">Assets/Lessons/H02_CanvasAnchor/Scenes/Ex07_CanvasScaler.unity</p>
-<p>前の作例の HUD はそのままに、Canvas Scaler の設定だけを変えると、4K の画面でも UI が同じ割合の大きさで表示されます。</p>
+<p>前の章の「やってみよう」の HUD はそのままに、Canvas Scaler の設定だけを変えると、4K の画面でも UI が同じ割合の大きさで表示されます。</p>
 <p class="label">使うもの</p>
 <ul>
 <li>Canvas Scaler：画面の解像度に合わせて、Canvas 全体を拡大縮小するコンポーネントです</li>
@@ -375,103 +486,7 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 <p>原理編の第2章では、横持ちのゲームなら高さ合わせ（Match = 1）が無難だとしています。画面が横に広がるとき、多くのゲームは左右の視野が広がる作りなので、UI の大きさは高さで安定させ、広がった左右はアンカーに吸収させる、という考え方です。</p>
 <p>一方、縦持ちのスマホアプリでは、基準を 1080 x 1920、Match を 0.5 にすることも多いです。作るものの持ち方に合わせて決めるとよいでしょう。</p>
 
-<h2 id="ch5">5. セーフエリアに収める</h2>
-<p>位置と大きさが追従するようになっても、スマホではまだ「欠ける」事故が残ります。ノッチ（画面上部の切り欠き）や角丸が、画面の端に置いた UI を隠してしまうからです。この章では Device Simulator で事故を見てから、セーフエリアに収める仕組みを作ります。</p>
-
-<h3>Device Simulator でスマホの画面を見る</h3>
-<p class="path">Assets/Lessons/H02_CanvasAnchor/Scenes/Ex08_DeviceSimulator.unity</p>
-<p>前の作例と同じ HUD を、ノッチのある iPhone の横持ちで表示すると、右上と右下の部品の角が欠けます。</p>
-<p class="label">使うもの</p>
-<ul>
-<li>Device Simulator：Game ビューの代わりに、実在するスマホの形と画面で表示する機能です</li>
-<li>セーフエリア（Safe Area）：ノッチや角丸に隠されず、確実に表示される範囲です</li>
-</ul>
-<p class="label">手順</p>
-<ol>
-<li>Ex07_CanvasScaler のシーンを開きます（Ex08_DeviceSimulator は中身が同じシーンです）</li>
-<li>Game ビュー左上の <strong>Game</strong> と書かれたドロップダウンをクリックし、<strong>Simulator</strong> を選びます</li>
-<li>ツールバーの端末名のドロップダウンをクリックし、<strong>Apple iPhone 12</strong> を選びます</li>
-<li>ツールバーの <strong>Rotate</strong> の矢印ボタンを押して、ノッチが右側に来る横向きにします</li>
-<li>ツールバーの <strong>Safe Area</strong> を押してオンにします（セーフエリアが黄色い枠で表示されます）</li>
-</ol>
-<figure>
-<img src="images/ex08_simulator_landscape.png" alt="Simulator で iPhone 12 を横向きに表示。右側にノッチがあり、右上の SCORE と右下の MAP の角が角丸とノッチに隠れている" loading="lazy">
-<figcaption>Simulator で iPhone 12 の横持ち。右上の SCORE と右下の MAP の角が、角丸に削られています</figcaption>
-</figure>
-<figure>
-<img src="images/ex08_simulator_safearea.png" alt="Safe Area をオンにした Simulator。セーフエリアが黄色い枠で示され、HUD の部品がその外にはみ出している" loading="lazy">
-<figcaption>Safe Area をオンにすると、セーフエリアが黄色い枠で表示されます。HUD の 4 つとも、枠の外にはみ出しています</figcaption>
-</figure>
-<p class="check"><strong>確認：</strong>iPhone 12 の横持ちで、画面の端に置いた HUD の部品がセーフエリアの外にはみ出し、角丸やノッチで欠けていることを確認します。</p>
-
-<h4>エディタでは気づけない事故</h4>
-<p>iPhone 12 の画面は 2532 x 1170 ピクセルで、横持ちのセーフエリアは左右に 141 ピクセルずつ、下に 63 ピクセルの欠けがあります。Game ビューの長方形の画面では、この欠けはまったく見えません。原理編の第2章で「エディタで気づけない代表例」とされているのはこのためで、スマホ向けの UI は Simulator で一度は確かめておくと安心です。</p>
-
-<h3>SafeAreaRoot で全体をセーフエリアに収める</h3>
-<p class="path">Assets/Lessons/H02_CanvasAnchor/Scenes/Ex09_SafeAreaRoot.unity</p>
-<p>前の作例と同じ HUD を、Canvas の直下に作った SafeArea というオブジェクトの子にまとめると、Play したときに HUD 全体がセーフエリアの内側に収まります。</p>
-<p class="label">使うもの</p>
-<ul>
-<li>SafeArea（空のオブジェクト）：HUD 全体の親になる四角形です</li>
-<li>SafeAreaRoot.cs：端末のセーフエリアを読み取り、SafeArea のアンカーをその範囲に合わせるスクリプトです（配布物の <code>Assets/Lessons/H02_CanvasAnchor/Scripts/</code> にあります）</li>
-</ul>
-<p class="label">手順</p>
-<ol>
-<li>Hierarchy で Canvas を右クリックし、<strong>Create Empty</strong> をクリックします（Canvas の子に、Rect Transform 付きの空のオブジェクトができます）</li>
-<li>名前を <code>SafeArea</code> にします（<kbd>Return</kbd>、Windows は <kbd>F2</kbd>）</li>
-<li>Anchor Presets で、列も行も <strong>stretch</strong> の右下のマスを <kbd>Shift</kbd> + <kbd>Alt</kbd>（Mac は <kbd>Option</kbd>）を押しながらクリックします（Left・Top・Right・Bottom がすべて 0 になります）</li>
-<li>Project ウィンドウの <code>SafeAreaRoot.cs</code> を、SafeArea の Inspector の空いているところへドラッグします</li>
-<li>Hierarchy で HP・Score・MiniMap・Message を順に SafeArea の上へドラッグし、SafeArea の子にします</li>
-<li>Simulator のまま Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押します</li>
-</ol>
-<div class="pair">
-<figure><img src="images/ex09_hierarchy.png" alt="Hierarchy。Canvas の子に SafeArea、その子に HP、Score、MiniMap、Message" loading="lazy"><figcaption>HUD の部品をすべて SafeArea の子にします</figcaption></figure>
-<figure><img src="images/ex09_inspector.png" alt="SafeArea の Inspector。Rect Transform は stretch で Left、Top、Right、Bottom が 0、その下に Safe Area Root (Script)" loading="lazy"><figcaption>SafeArea は全面ストレッチにして、Safe Area Root を付けます</figcaption></figure>
-</div>
-<figure>
-<img src="images/ex09_simulator_play_safearea.png" alt="Play 中の Simulator。HUD の 4 つが黄色いセーフエリアの枠の内側に表示されている" loading="lazy">
-<figcaption>Play 中（Safe Area オン）。HUD 全体が黄色い枠の内側、つまりノッチと角丸を避けた範囲に収まりました</figcaption>
-</figure>
-<p class="check"><strong>確認：</strong>Play 中、SCORE と MAP がノッチや角丸に欠けずに表示されることを確認します。Safe Area をオンにして、4 つの部品すべてが黄色い枠の内側にあることも見ておきます。確かめたら Play を止めます。</p>
-
-<p>SafeAreaRoot.cs の全文です。配布物に入っているので書き写す必要はありませんが、行ごとの意味を読んでおきましょう。</p>
-<pre><code>using UnityEngine;
-
-/// Canvas 直下に置く。Screen.safeArea をアンカーに反映(回転・解像度変化にも追従)
-public class SafeAreaRoot : MonoBehaviour
-{
-    Rect _applied;
-    void Awake() { Apply(); }
-    void Update() { if (Screen.safeArea != _applied) Apply(); }   // 回転対応
-    void Apply()
-    {
-        _applied = Screen.safeArea;
-        var rt = (RectTransform)transform;
-        rt.anchorMin = new Vector2(_applied.xMin / Screen.width, _applied.yMin / Screen.height);
-        rt.anchorMax = new Vector2(_applied.xMax / Screen.width, _applied.yMax / Screen.height);
-        rt.offsetMin = rt.offsetMax = Vector2.zero;
-    }
-}</code></pre>
-<table>
-<tr><th>行</th><th>していること</th></tr>
-<tr><td><code>Rect _applied;</code></td><td>最後に当てはめたセーフエリアを覚えておく変数です</td></tr>
-<tr><td><code>void Awake() { Apply(); }</code></td><td>シーンが始まったときに 1 回、セーフエリアを当てはめます</td></tr>
-<tr><td><code>void Update() { if (Screen.safeArea != _applied) Apply(); }</code></td><td>毎フレーム、今のセーフエリアが覚えている値と違うかを比べ、違ったときだけ当てはめ直します</td></tr>
-<tr><td><code>_applied = Screen.safeArea;</code></td><td>端末が教えてくれるセーフエリア（ピクセル単位の四角形）を受け取ります</td></tr>
-<tr><td><code>var rt = (RectTransform)transform;</code></td><td>このオブジェクトの Rect Transform を取り出します</td></tr>
-<tr><td><code>rt.anchorMin = ...</code></td><td>セーフエリアの左下の角を画面の幅と高さで割り、0〜1 の割合にしてアンカーの Min に入れます</td></tr>
-<tr><td><code>rt.anchorMax = ...</code></td><td>右上の角も同じように割合にして、アンカーの Max に入れます</td></tr>
-<tr><td><code>rt.offsetMin = rt.offsetMax = Vector2.zero;</code></td><td>端からの余白（Left・Bottom・Right・Top）を 0 にして、アンカーの範囲いっぱいに広げます</td></tr>
-</table>
-<p>iPhone 12 の横持ちなら、Min は 141 ÷ 2532 ≒ 0.056 と 63 ÷ 1170 ≒ 0.054、Max は 2391 ÷ 2532 ≒ 0.944 と 1 になります。Ex05 で学んだ「アンカーを範囲に広げる」仕組みを、スクリプトから使っていることになります。</p>
-
-<h4>Update で毎フレーム比べる理由</h4>
-<p>セーフエリアは、ゲームの途中でも変わります。スマホを縦から横に回したり、パソコンでウィンドウの大きさを変えたりすると、そのたびにノッチの位置や画面の幅が変わるからです。Awake の 1 回だけでは、回転した後に古いセーフエリアのままになってしまいます。</p>
-<p>とはいえ、毎フレーム当てはめ直す必要はありません。四角形どうしの比較はとても軽い処理なので、毎フレーム「変わったか」だけを確かめ、変わったときだけ Apply を呼んでいます。HUD の部品はすべて SafeArea の子なので、親が縮めば子は自分のアンカーに従って内側へ移ります。</p>
-
-<p>この仕組みは、画面を作り始める最初の 1 回目から入れておくのがおすすめです。部品を置いた後から SafeArea の子へ移し替えるより、先に SafeArea を作ってその中に置いていくほうが、手間も事故も少なくなります。</p>
-
-<h2 id="ch6">6. 見切れる画面と付き合ってきた歴史</h2>
+<h2 id="ch5">5. 見切れる画面と付き合ってきた歴史</h2>
 <p>セーフエリアは、スマホのノッチと一緒に生まれた考え方ではありません。画面の端が見えないかもしれない、という前提は、テレビの時代からずっと作り手の悩みでした。この章では、その歴史と、たくさんの画面を破綻なく作るための現場の工夫を 1 つずつ紹介します。</p>
 
 <h3>テレビのオーバースキャンとタイトルセーフ</h3>
@@ -489,14 +504,14 @@ public class SafeAreaRoot : MonoBehaviour
 <p>今日の作業も同じ順序でできています。SafeArea というルートを最初に 1 つ作り、その中に部品を置いていけば、あとから画面が増えても全部が自動でセーフエリアに収まります。土台を先に作ってから中身を並べる、という順番は、学校の課題でも現場の大作でも変わらないと言えそうです。</p>
 <p class="note">出典：SMPTE の経緯は NAB「Television Safe Areas Redefined」（2010）、講演の数値は GDC Vault で公開されている Joel Gonzales さんの講演資料（GDC 2023）によります。</p>
 
-<h2 id="ch7">7. まとめ</h2>
-<p>今日は、1 つのボタンを「消える」「小さくなる」「欠ける」の 3 つの事故に順番に遭わせ、それぞれを別の道具で直しました。</p>
+<h2 id="ch6">6. まとめ</h2>
+<p>今日は、土台である画面の形や解像度を変えたときに、三つの層でそれぞれ何が壊れるかを見て、別々の道具で直しました。</p>
 <ul>
-<li><strong>アンカー</strong>：要素が「どの隅の仲間か」を機械に伝える設定です。講義 D02 の言葉では、アンカー設定はレイアウトの意図を機械に伝える作業でした。所属が決まらない要素は、置き場所を迷っている要素だと考えられます。</li>
-<li><strong>Canvas Scaler</strong>：大きさの追従です。位置はアンカー、大きさはスケーラ、という二段構えがマルチ解像度対応の基本になります。</li>
-<li><strong>セーフエリア</strong>：見えることの保証です。画面の端ぴったりに置いたボタンは、エディタでは見えても実機では欠けることがあります。</li>
+<li><strong>体験の層（アンカー・セーフエリア）</strong>：押したいボタンが、どの画面でも見えて押せることを守りました。アンカーで隅に留め、セーフエリアで見えることを保証します。画面の端ぴったりに置いたボタンは、エディタでは見えても実機では欠けることがあります。</li>
+<li><strong>情報の層（アンカーの範囲・ピボット・隅の仲間分け）</strong>：帯や通知が途中で切れず、いつもの場所にあることを守りました。アンカーは、要素が「どの隅の仲間か」を機械に伝える設定です。講義 D02 の言葉では、アンカー設定はレイアウトの意図を機械に伝える作業でした。所属が決まらない要素は、置き場所を迷っている要素だと考えられます。</li>
+<li><strong>見た目の層（Canvas Scaler）</strong>：大きさの追従です。位置はアンカー、大きさはスケーラ、という二段構えがマルチ解像度対応の基本になります。</li>
 </ul>
-<p>Web のレイアウトは内容に合わせて流れますが、ゲームの UI は固定の舞台に貼りつけて、画角の変化に耐えさせます。今日の 3 つの道具は、その「耐えさせる」ための仕組みでした。</p>
+<p>Web のレイアウトは内容に合わせて流れますが、ゲームの UI は固定の舞台に貼りつけて、画角の変化に耐えさせます。今日の道具は、土台が変わっても三つの層を崩さずに「耐えさせる」ための仕組みでした。</p>
 <p>なお、Canvas にはもう 1 つ、UI を 3D 空間の中に板として置く World Space というモードがあります。こちらは第10回で扱います。</p>
 
 <footer>
