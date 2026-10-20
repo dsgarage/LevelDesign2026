@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第3回：アフォーダンスとシグニファイア</title>
+<style>
+:root {
+  --text: #1f2328;
+  --muted: #59636e;
+  --line: #d8dee4;
+  --accent: #2f6fde;
+  --code-bg: #f3f5f7;
+  --why: #e07a1f;
+  --bg: #ffffff;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+  font-size: 16.5px;
+  line-height: 1.8;
+}
+main { max-width: 760px; margin: 0 auto; padding: 40px 16px 96px; }
+header.page-head { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 28px; }
+header.page-head .series { color: var(--muted); font-size: 14px; margin: 0; }
+h1 { font-size: 30px; line-height: 1.4; margin: 6px 0 4px; }
+.date { color: var(--muted); font-size: 14px; margin: 0; }
+h2 { font-size: 24px; line-height: 1.45; margin: 64px 0 12px; padding-top: 12px; border-top: 2px solid var(--text); }
+h3 { font-size: 20px; line-height: 1.5; margin: 44px 0 6px; }
+h4 { font-size: 17px; margin: 28px 0 6px; padding-left: 12px; border-left: 4px solid var(--why); }
+p { margin: 0 0 14px; }
+ul, ol { margin: 0 0 16px; padding-left: 1.6em; }
+li { margin: 2px 0; }
+a { color: var(--accent); }
+code, kbd { font-family: "SFMono-Regular", Menlo, Consolas, monospace; font-size: 0.9em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; word-break: break-word; }
+kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: #fff; }
+.path { display: inline-block; max-width: 100%; margin: 0 0 12px; padding: 2px 10px; background: #1f2328; color: #f0f3f6; border-radius: 4px; font-family: "SFMono-Regular", Menlo, Consolas, monospace; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.label { font-weight: bold; margin: 18px 0 4px; }
+.check { background: #eef6ee; border-left: 4px solid #2e8b57; padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 16px 0; }
+.check strong { color: #22693f; }
+.note { background: #f6f8fa; border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; margin: 16px 0; font-size: 15.5px; }
+.download { border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; margin: 20px 0; background: #f8fafc; }
+.download h2 { all: unset; display: block; font-weight: bold; font-size: 17px; margin-bottom: 6px; }
+figure { margin: 18px 0 24px; }
+img, video { max-width: 100%; }
+figure img, figure video { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--line); background: #222; }
+figcaption { color: var(--muted); font-size: 14px; margin-top: 6px; line-height: 1.6; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pair figure { margin: 0; }
+.trio { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 18px 0 24px; }
+.trio figure { margin: 0; }
+/* 1920x1080 の撮影画像の中央（ボタンのあたり）だけを 3 倍で見せる。画像ファイルは加工しない */
+.zoom { overflow: hidden; aspect-ratio: 2 / 1; border-radius: 6px; border: 1px solid var(--line); background: #2a2e38; }
+figure .zoom img { display: block; width: 300%; max-width: none; margin: -59.375% 0 0 -100%; border: 0; border-radius: 0; }
+@media (max-width: 560px) { .pair, .trio { grid-template-columns: 1fr; } }
+table { width: 100%; max-width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 15px; display: block; overflow-x: auto; }
+th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: #f3f5f7; }
+@media (max-width: 560px) { th, td { min-width: 6.5em; } }
+pre { max-width: 100%; background: #1f2328; color: #e6edf3; padding: 14px 16px; border-radius: 6px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; margin: 12px 0 18px; }
+pre code { background: none; padding: 0; color: inherit; word-break: normal; }
+nav.toc { border: 1px solid var(--line); border-radius: 8px; padding: 12px 18px; margin: 24px 0; font-size: 15px; }
+nav.toc ol { margin: 6px 0 0; }
+footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 12px; }
+</style>
+</head>
+<body>
+<main>
+<header class="page-head">
+<p class="series">レベルデザイン基礎 演習 H03</p>
+<h1>第3回：アフォーダンスとシグニファイア</h1>
+<p class="date">2026-11-05</p>
+</header>
+
+<section class="download">
+<h2>本日の配布物</h2>
+<p><a href="H03_Affordance.unitypackage" download>H03_Affordance.unitypackage</a>（作例 Ex01〜Ex08 の完成シーンと、<code>ClickReaction.cs</code>・<code>MissTarget.cs</code>・<code>ContrastReadout.cs</code> の 3 つのスクリプト）</p>
+<p style="margin:0">前回までの <strong>DesignPrinciples2026</strong> プロジェクトをそのまま使います。メニューバーの <strong>Assets → Import Package → Custom Package...</strong> でこのファイルを選び、<strong>Import</strong> を押すと <code>Assets/Lessons/H03_Affordance/</code> に入ります。</p>
+</section>
+
+<p>今日は、ボタンが「押せそう」に見える仕組みを、Unity の標準の Button を使って手で確かめます。手がかりを 1 つずつ消したボタンを押し比べ、押せそうで押せない飾りや、押せるのに押せそうに見えないボタンを作ってから、状態の色と明るさの比で直していきます。</p>
+<p>同じ日の講義（原理編 第3章「アフォーダンスとシグニファイア」）で聞いた話を、ここでは自分の手で再現します。章は、これまでと同じく三つの層の順に並べています。</p>
+
+<nav class="toc">
+<strong>目次</strong>
+<ol start="0">
+<li><a href="#ch0">はじめに：三つの層と、今日の問い</a></li>
+<li><a href="#ch1">準備：ボタンを置き、Transition を読む</a></li>
+<li><a href="#ch2">体験の層：押せそうに見えるか</a></li>
+<li><a href="#ch3">情報の層：押したことが伝わるか</a></li>
+<li><a href="#ch4">見た目の層：背景から浮いて見えるか</a></li>
+<li><a href="#ch5">手がかりを設計してきた現場</a></li>
+<li><a href="#ch6">まとめ</a></li>
+</ol>
+</nav>
+
+<h2 id="ch0">0. はじめに：三つの層と、今日の問い</h2>
+<p>講義 D01（原理編 第1章）では、ゲームのデザインが扱う範囲を三つの層に分けました。</p>
+<ul>
+<li><strong>体験の層</strong>：操作したときの手応えや迷いにくさ</li>
+<li><strong>情報の層</strong>：何を、どんな順番で、どれくらいの強さで見せるか</li>
+<li><strong>見た目の層</strong>：色、形、レイアウト、フォント</li>
+</ul>
+<p>前回の H02 では、三つの層を載せる土台（画面）を整えました。今日はその上に置くボタンそのものを扱います。問いは 1 つで、「押せることを、どう伝えるか」です。</p>
+<p>この問いには、2 つの言葉が役に立ちます。アフォーダンス（affordance）は、モノが「どんな行為を可能にするか」という関係のことです。画面でいえば、クリックすると反応する、というボタンの「できること」がアフォーダンスにあたります。</p>
+<p>シグニファイア（signifier）は、その「できること」を伝える手がかりです。ボタンの立体感や影、乗せたときの色の変化、「次へ」のような文言がそうです。アフォーダンスが「できること」、シグニファイアが「できると分かること」と捉えると、この先の話が整理しやすくなります。</p>
+<p>この演習では、手がかりが欠けたときに各層で何が起きるかを順に見ていきます。体験の層では押せるのに見落とされ、情報の層では押したかどうかが分からず、見た目の層ではボタンが背景に沈みます。</p>
+<p class="note">配布シーンの Ex 番号は Unity で作業しやすい順に付けています。このページは層の順に並べているので、番号が飛ぶところがあります。前提の状態をどのシーンで用意するかは、作例ごとに書いています。</p>
+
+<h2 id="ch1">1. 準備：ボタンを置き、Transition を読む</h2>
+<p>層の話に入る前に、標準のボタンを 1 つ置き、見た目の変わり方を決めている欄を読んでおきます。今日の作例は、すべてこの欄の値を変えて進めます。</p>
+
+<h3>ボタンを置いて Transition 欄を読む</h3>
+<p class="path">Assets/Lessons/H03_Affordance/Scenes/Ex01_ButtonTransition.unity</p>
+<p>メニューからボタンを作って大きさを 240 x 88 にすると、Game ビューの真ん中に白い「Button」が表示されます。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>Button - TextMeshPro：押せるボタンです。土台の Canvas と、入力を振り分ける EventSystem も一緒に作られます</li>
+<li>Button コンポーネント：押されたときの処理と、状態ごとの見た目の変え方を持っています</li>
+<li>トランジション（Transition）：ボタンの状態が変わったときに、見た目をどう変えるかの方式です</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>試し用のシーン（前回までの SampleScene など）を開きます</li>
+<li>Hierarchy ウィンドウの何もないところを右クリックします</li>
+<li><strong>UI (Canvas) → Button - TextMeshPro</strong> をクリックします</li>
+<li>作られた Button が選ばれた状態で、Inspector の Rect Transform の Width に <code>240</code>、Height に <code>88</code> を入力します（入力したら <kbd>Enter</kbd>）</li>
+<li>Inspector を下へスクロールし、<strong>Button</strong> コンポーネントの見出しの左にある三角をクリックして開きます</li>
+</ol>
+<figure>
+<img src="images/ex01_game.png" alt="暗い灰色の Game ビューの中央に、白い Button と書かれたボタンが 1 つある" loading="lazy">
+<figcaption>240 x 88 にしたボタン。配布シーンはカメラの背景色を暗い灰色にしています</figcaption>
+</figure>
+<figure>
+<img src="images/ex01_button_inspector.png" alt="Button コンポーネントの Inspector。Interactable にチェック、Transition が Color Tint、その下に Target Graphic、Normal Color から Disabled Color までの 5 色、Color Multiplier 1、Fade Duration 0.1、Navigation が Automatic、Visualize ボタン" loading="lazy">
+<figcaption>Button コンポーネント。Transition が Color Tint のとき、その下に状態ごとの色が並びます</figcaption>
+</figure>
+<table>
+<tr><th>欄</th><th>意味</th><th>作った直後の値</th></tr>
+<tr><td>Interactable</td><td>いま押せるかどうかです。外すと Disabled（押せない）の状態になります</td><td>オン</td></tr>
+<tr><td>Transition</td><td>状態が変わったときの見た目の変え方です。Color Tint は色を掛けて変えます</td><td>Color Tint</td></tr>
+<tr><td>Target Graphic</td><td>色を変える対象です。ボタンの板（Image）が入っています</td><td>Button (Image)</td></tr>
+<tr><td>Normal Color</td><td>何もしていないときの色です</td><td>255, 255, 255（白）</td></tr>
+<tr><td>Highlighted Color</td><td>マウスのカーソルが乗っているときの色です</td><td>245, 245, 245</td></tr>
+<tr><td>Pressed Color</td><td>押している最中の色です</td><td>200, 200, 200</td></tr>
+<tr><td>Selected Color</td><td>キーボードやパッドで選ばれているときの色です</td><td>245, 245, 245</td></tr>
+<tr><td>Disabled Color</td><td>Interactable が外れているときの色です</td><td>200, 200, 200（不透明度 128）</td></tr>
+<tr><td>Color Multiplier</td><td>上の色にさらに掛ける倍率です（1〜5）</td><td>1</td></tr>
+<tr><td>Fade Duration</td><td>色が切り替わるまでの秒数です</td><td>0.1</td></tr>
+<tr><td>Navigation</td><td>矢印キーやパッドで、次にどのボタンへ移るかの決め方です</td><td>Automatic</td></tr>
+</table>
+<p class="check"><strong>確認：</strong>Button コンポーネントの Transition が Color Tint になっていて、その下に Normal Color から Disabled Color までの 5 つの色が並んでいることを確認します。</p>
+
+<h4>初期値のままでは、乗せてもほとんど変わらない理由</h4>
+<p>色は 0〜255 の数で表され、白い板に 245 の灰色を掛けると、ほんの少しだけ暗くなります。原理編の第3章では、この初期値を明るさの比で測っていて、Normal と Highlighted の比は 1.09:1、Normal と Pressed の比は 1.67:1 でした。比が 1:1 に近いほど、2 つの色は見分けにくくなります。</p>
+<p>つまり初期値のままでは、マウスを乗せても色はほとんど変わりません。このページの 3 章（情報の層）で、この値を自分で決め直します。</p>
+
+<h2 id="ch2">2. 体験の層：押せそうに見えるか</h2>
+<p>この層で守るのは、押せるものが押せそうに見え、押せないものが押せなさそうに見えることです。押せるボタンの前を素通りされたり、ただの飾りを何度もクリックされたりする場面は、どちらも体験の層が壊れた状態です。</p>
+<p>この章では、まず手がかりを 1 つずつ消したボタンを押し比べます。次に、見た目と中身が食い違う 2 つの例を作り、最後に「いまは押せない」を見せる Disabled の状態を確かめます。</p>
+
+<h3>手がかりを 1 つずつ消した 4 つのボタン</h3>
+<p class="path">Assets/Lessons/H03_Affordance/Scenes/Ex02_FourCues.unity</p>
+<p>前の作例のボタンに、形（角丸と影）・色・文言の 3 つの手がかりを持たせたものが左端の ALL CUES です。残りの 3 つは、そこから手がかりを 1 つだけ消しています。4 つとも押すと下の Clicked が増え、どれも同じように押せることが分かります。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>ALL CUES：青い塗り、角丸と影、「NEXT &gt;」の文言がそろったボタンです</li>
+<li>NO TEXT / NO COLOR / NO SHAPE：それぞれ文言・色・形（角丸と影）だけを消したボタンです</li>
+<li>ClickReaction.cs：ボタンが押された回数（Clicked）と、空振りの回数（Missed）を数えて表示するスクリプトです</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Assets/Lessons/H03_Affordance/Scenes/Ex02_FourCues</code> をダブルクリックして開きます</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押します</li>
+<li>Game ビューで、4 つのボタンを左から順に 1 回ずつクリックします</li>
+<li>確かめたら、もう一度 Play ボタンを押して止めます</li>
+</ol>
+<figure>
+<img src="images/ex02_four_cues.png" alt="左から ALL CUES の青いボタン、NO TEXT の文字のない青いボタン、NO COLOR の背景とほぼ同じ色のボタン、NO SHAPE の角丸と影のない青い四角。下に Clicked: 0 Missed: 0" loading="lazy">
+<figcaption>左から ALL CUES、NO TEXT、NO COLOR、NO SHAPE。どれも Button を持っていて、押せます</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>4 つのボタンを押すたびに Clicked が 1 ずつ増え、最後に「Clicked: 4」になることを確認します。そのうえで、初めてこの画面を見た人が押しそびれそうなのはどれかを考えてみます。</p>
+
+<h4>押せるのに押されにくいボタン</h4>
+<p>4 つとも機能は同じなので、アフォーダンスは 4 つとも持っています。違うのはシグニファイアの数だけです。人は形・色・文言といった手がかりを足し合わせて「これはボタンだ」と判断しているので、1 つ欠けるごとにボタンらしさは弱くなります。</p>
+<p>いちばん差が大きいのは NO COLOR です。色を明るさの比で測ると、ALL CUES の青と背景の比は 4.07:1 ですが、NO COLOR の塗りと背景の比は 1.12:1 しかありません。押せるのに背景に溶けていて、素通りされやすいボタンになっています。</p>
+<p>機能はあるのに気づかれない、という失敗の多くはこの手がかりの不足から起きるので、機能を作り直す前に手がかりを足すと直ることがよくあります。</p>
+
+<h3>ボタンに見える飾りと、文字に見えるボタン</h3>
+<p class="path">Assets/Lessons/H03_Affordance/Scenes/Ex03_FalseHidden.unity</p>
+<p>前の作例の ALL CUES と同じ見た目の板から、Button だけを取り除いたものを左に置きました。右には、板を透明にして文字だけにしたボタンを置いています。左を押すと Missed（空振り）が増え、右を押すと Clicked が増えます。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>Deco_LooksLikeButton：ボタンに見えるけれど Button を持たない飾りの板です</li>
+<li>Button_LooksLikeText：板の色を透明（アルファ 0）にした、文字だけに見えるボタンです</li>
+<li>MissTarget.cs：飾りがクリックされたら、空振りとして ClickReaction に数えさせるスクリプトです</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Ex03_FalseHidden</code> をダブルクリックして開きます</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押します</li>
+<li>左の「NEXT &gt;」を 3 回クリックします</li>
+<li>右の「Continue」を 1 回クリックします</li>
+<li>Play を止め、Hierarchy で <code>Deco_LooksLikeButton</code> をクリックして Inspector を見ます</li>
+</ol>
+<figure>
+<img src="images/ex03_false_hidden.png" alt="左に青い NEXT ボタン、右に灰色の文字 Continue だけ、下に Clicked: 0 Missed: 0" loading="lazy">
+<figcaption>左は押せそうで押せない飾り、右は押せるのにただの文字に見えるボタンです</figcaption>
+</figure>
+<figure>
+<img src="images/ex03_deco_inspector.png" alt="Deco_LooksLikeButton の Inspector。Image の Source Image が UISprite、Color が青、Raycast Target にチェック、Image Type が Sliced、Pixels Per Unit Multiplier 0.35。その下に Shadow と Miss Target (Script)、Counter に ClickCounter" loading="lazy">
+<figcaption>飾りの Inspector。Image と Shadow はボタンと同じですが、Button コンポーネントがありません</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>左を 3 回押すと「Missed: 3」、右を 1 回押すと「Clicked: 1」になることを確認します。飾りの Inspector に Button が無く、Raycast Target にチェックが入っていることも見ておきます。</p>
+
+<h4>四つの組み合わせ</h4>
+<p>HCI（人とコンピュータの関わりを研究する分野）の研究者ウィリアム・ゲイバー（William Gaver）は、1991 年の論文で「実際にできるか」と「できると示す手がかりがあるか」を縦横に取り、四つの組み合わせを示しました。今日の作例を当てはめると、次のようになります。</p>
+<table>
+<tr><th>名前</th><th>できるか</th><th>手がかり</th><th>今日の作例</th><th>起きること</th></tr>
+<tr><td>知覚できるアフォーダンス（perceptible affordance）</td><td>できる</td><td>ある</td><td>Ex02 の ALL CUES</td><td>迷わず押せる</td></tr>
+<tr><td>隠れたアフォーダンス（hidden affordance）</td><td>できる</td><td>ない</td><td>Ex03 右の Continue、Ex02 の NO COLOR</td><td>素通りされる</td></tr>
+<tr><td>偽のアフォーダンス（false affordance）</td><td>できない</td><td>ある</td><td>Ex03 左の飾り</td><td>押して裏切られる</td></tr>
+<tr><td>正しい拒否（correct rejection）</td><td>できない</td><td>ない</td><td>背景、ボタンの上の見出し</td><td>誰も押そうとしない</td></tr>
+</table>
+<p>目指すのは知覚できるアフォーダンスです。ゲイバーは、隠れたアフォーダンスと偽のアフォーダンスが誤りを生むと書いています。偽の手がかりで空振りが重なると、プレイヤーは画面の手がかりを信用しなくなり、本物のボタンまで押されにくくなります。</p>
+<p>飾りがクリックを受け取れるのは、Image の Raycast Target がオンだからです。MissTarget.cs はこの性質を使って空振りを数えています。Button を持たない飾りでも、Raycast Target がオンのままだと「クリックが届く板」になる点は覚えておくと便利です。</p>
+
+<h3>Interactable を外して Disabled にする</h3>
+<p class="path">Assets/Lessons/H03_Affordance/Scenes/Ex04_Disabled.unity</p>
+<p>Ex02 の ALL CUES と同じボタンを 2 つ並べ、右だけ Interactable のチェックを外しています。右のボタンは暗くなり、押しても反応しなくなります。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>Interactable：ボタンがいま押せるかどうかを決めるチェックです</li>
+<li>Disabled Color：Interactable が外れているときに、Target Graphic に掛ける色です</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Ex04_Disabled</code> をダブルクリックして開きます</li>
+<li>Hierarchy で <code>Button_InteractableOff</code> をクリックします</li>
+<li>Inspector の Button で、Interactable のチェックが外れていることを確かめます。チェックを入れたり外したりして、Game ビューのボタンの色の変化を見比べます（最後は外した状態に戻します）</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押し、左右のボタンにカーソルを乗せたりクリックしたりして、反応を比べます。確かめたら Play を止めます</li>
+</ol>
+<figure>
+<img src="images/ex04_disabled.png" alt="左に INTERACTABLE ON の明るい青いボタン、右に INTERACTABLE OFF の暗い青いボタン。どちらも NEXT の文字は白いまま" loading="lazy">
+<figcaption>左が Interactable オン、右がオフ。右は板が暗くなりますが、文字の「NEXT &gt;」は白いままです</figcaption>
+</figure>
+<figure>
+<img src="images/ex04_interactable_off.png" alt="Button_InteractableOff の Inspector。Interactable のチェックが外れている。Transition は Color Tint、Target Graphic は Button_InteractableOff (Image)" loading="lazy">
+<figcaption>右のボタンの Inspector。Interactable のチェックが外れています。Target Graphic は板の Image だけです</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>Interactable を外すと板が暗くなり、Play 中に乗せても押しても色が変わらないことを確認します。そのうえで、文字が明るいまま残っていることにも注目します。</p>
+
+<h4>「いまは押せない」を正しく見せるには</h4>
+<p>Disabled Color は Target Graphic、つまり板の Image にしか掛かりません。文字は板の子にある別の部品なので、初期値のままでは白く明るいまま残ります。板は暗いのに文字はくっきりしているので、遠目には「押せそう」な顔が少し残ってしまいます。</p>
+<p>押せないボタンは、四つの組み合わせでいう正しい拒否の側に寄せたいところです。原理編の第3章では、Disabled の見た目の定石を「彩度を落として薄く、影を消す」としています。文字の色も薄くし、影を消すと、板だけでなくボタン全体が「いまは押せない」と伝えるようになります。</p>
+
+<h2 id="ch3">3. 情報の層：押したことが伝わるか</h2>
+<p>この層で守るのは、ボタンの状態が変わったことがプレイヤーに伝わることです。カーソルを乗せても色が変わらない、押したのか押せていないのか分からない、パッドでいまどれが選ばれているのか分からない、という場面では、押せても情報が届いていません。</p>
+<p>この章では、Color Tint の色を決め直して状態の違いを見えるようにし、続けてキーボードで操作したときの Selected の印を確かめます。</p>
+
+<h3>Color Tint の色を決め直す</h3>
+<p class="path">Assets/Lessons/H03_Affordance/Scenes/Ex05_ColorTint.unity</p>
+<p>Ex02 の ALL CUES と同じボタンを 1 つ置き、Color Tint の色だけを変えます。乗せると少し明るく、押すとはっきり暗くなります。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>Normal / Highlighted / Pressed / Selected Color：状態ごとに板へ掛ける色です</li>
+<li>Color ウィンドウ：色の欄をクリックすると開く画面です。Hexadecimal の欄に 16 進数で色を入力できます</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Ex05_ColorTint</code> をダブルクリックして開きます（配布シーンは手順を終えた状態です。自分で試すときは、Ex02 の ALL CUES を選んで同じ操作をします）</li>
+<li>Hierarchy で <code>Button_ColorTint</code> をクリックします</li>
+<li>Inspector の Button で、Normal Color の色の帯をクリックし、開いた Color ウィンドウの Hexadecimal に <code>DCDCDC</code>（220, 220, 220）を入力して <kbd>Enter</kbd> を押します</li>
+<li>同じように、Highlighted Color に <code>FFFFFF</code>（255）、Pressed Color に <code>969696</code>（150）、Selected Color に <code>DCDCDC</code>（220）を入力します</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押し、ボタンにカーソルを乗せたり、押したままにしたりします。確かめたら Play を止めます</li>
+</ol>
+<figure>
+<img src="images/ex05_colorblock.png" alt="Button_ColorTint の Inspector。Normal Color が薄い灰色、Highlighted Color が白、Pressed Color が濃い灰色、Selected Color が薄い灰色" loading="lazy">
+<figcaption>変更後の色。Normal を白から少し下げ、Highlighted を白、Pressed を濃い灰色にしています</figcaption>
+</figure>
+<div class="trio">
+<figure><div class="zoom"><img src="images/ex05_normal.png" alt="Normal の状態の青いボタン" loading="lazy"></div><figcaption>Normal</figcaption></figure>
+<figure><div class="zoom"><img src="images/ex05_highlighted.png" alt="Highlighted の状態の、少し明るい青いボタン" loading="lazy"></div><figcaption>Highlighted（乗せた）</figcaption></figure>
+<figure><div class="zoom"><img src="images/ex05_pressed.png" alt="Pressed の状態の、暗い青いボタン" loading="lazy"></div><figcaption>Pressed（押している）</figcaption></figure>
+</div>
+<p class="note" style="margin-top:-12px">3 枚とも、Game ビューの中央にあるボタンのあたりを拡大して並べています。</p>
+<figure>
+<video controls muted playsinline preload="metadata" src="videos/ex05_states.mp4" title="Normal から Highlighted、Pressed へ状態が変わる"></video>
+<figcaption>カーソルを乗せると明るく（Highlighted）、押すと暗く（Pressed）なり、離すと戻る様子を繰り返しています</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>Play 中、カーソルを乗せるとボタンが少し明るくなり、押している間ははっきり暗くなることを確認します。</p>
+
+<h4>Normal を 220 に下げる理由</h4>
+<p>Color Tint は、板の Image の色に状態の色を掛け算します。Color Multiplier が 1 のとき、掛ける色の上限は白（255）なので、Image の色より明るくはできません。</p>
+<p>初期値のように Normal が 255 だと、Highlighted で明るくする余地が残っていないわけです。そこで Normal を 220 に下げ、Highlighted を 255 にして、乗せたときに明るくなる幅を作りました。</p>
+<table>
+<tr><th>状態</th><th>初期値</th><th>この作例</th><th>伝えること</th></tr>
+<tr><td>Normal</td><td>255</td><td>220</td><td>押せる</td></tr>
+<tr><td>Highlighted</td><td>245（Normal より暗い）</td><td>255（少し明るく）</td><td>いま乗っている</td></tr>
+<tr><td>Pressed</td><td>200</td><td>150（はっきり暗く）</td><td>いま押している</td></tr>
+<tr><td>Selected</td><td>245</td><td>220（Normal と同じ）</td><td>キーやパッドで選ばれている</td></tr>
+</table>
+<p>このボタンの青で明るさの比を測ると、Normal と Highlighted は 1.30:1、Normal と Pressed は 1.79:1 になりました。初期値の白いボタンでは 1.09:1 と 1.67:1 だったので、乗せたときの変化がはっきり大きくなっています。Pressed で暗くするのは、現実のボタンが押されると沈むからです。</p>
+<p>ただし、ホバー（カーソルを乗せた状態）があるのはマウスだけです。パッドにはカーソルが無く、タッチは指が触れた瞬間がもう押した状態です。ホバーで初めて押せると分かるボタンは、パッドやタッチでは隠れたアフォーダンスになってしまうので、手がかりの本体は Normal の見た目に持たせ、ホバーは確認の役と考えると安全です。</p>
+
+<h3>矢印キーで Selected が移る</h3>
+<p class="path">Assets/Lessons/H03_Affordance/Scenes/Ex06_SelectedFocus.unity</p>
+<p>前の作例では、Selected Color を Normal と同じにしました。今度は Selected Color を黄色にしたボタンを縦に 3 つ並べます。Play して矢印キーを押すと、黄色の印が START・OPTIONS・QUIT の間を移ります。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>フォーカス（focus）：キーボードやパッドで、いま選ばれている 1 つのことです。Button では Selected の状態になります</li>
+<li>Navigation：矢印キーで次にどのボタンへ移るかの決め方です。Vertical にすると上下だけで移ります</li>
+<li>EventSystem の First Selected：Play を始めたときに、最初に選ばれているボタンです</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Ex06_SelectedFocus</code> をダブルクリックして開きます（配布シーンは手順を終えた状態です）</li>
+<li>Hierarchy で <code>Button_START</code> をクリックし、Inspector の Button で Selected Color の帯をクリックして、Hexadecimal に <code>FFD23C</code>（黄色）を入力します</li>
+<li>同じ Button の Navigation のドロップダウンをクリックし、<strong>Vertical</strong> を選びます</li>
+<li><code>Button_OPTIONS</code> と <code>Button_QUIT</code> にも、手順 2 と 3 を同じように行います</li>
+<li>Hierarchy で <code>EventSystem</code> をクリックし、Inspector の Event System にある First Selected の欄へ、Hierarchy の <code>Button_START</code> をドラッグします</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押し、マウスには触らずに <kbd>↓</kbd> と <kbd>↑</kbd> を押します（Game ビューの何もないところをクリックすると、選ばれていたボタンが外れます）</li>
+</ol>
+<figure>
+<img src="images/ex06_navigation.png" alt="Button_START の Inspector。Selected Color が黄色、Navigation が Vertical、その下に Wrap Around" loading="lazy">
+<figcaption>Button_START の設定。Selected Color を黄色に、Navigation を Vertical にしています</figcaption>
+</figure>
+<figure>
+<img src="images/ex06_eventsystem.png" alt="EventSystem の Inspector。Event System の First Selected が Button_START、Send Navigation Events にチェック、Drag Threshold 10、下に Input System UI Input Module (Script)" loading="lazy">
+<figcaption>EventSystem の First Selected に Button_START を入れると、Play を始めた瞬間から START が選ばれています</figcaption>
+</figure>
+<div class="pair">
+<figure><img src="images/ex06_selected_start.png" alt="START だけが黄色、OPTIONS と QUIT は白っぽい灰色" loading="lazy"><figcaption>Play を始めた直後。First Selected の START が黄色です</figcaption></figure>
+<figure><img src="images/ex06_selected_options.png" alt="OPTIONS だけが黄色、START と QUIT は白っぽい灰色" loading="lazy"><figcaption><kbd>↓</kbd> を 1 回押すと、黄色の印が OPTIONS に移ります</figcaption></figure>
+</div>
+<figure>
+<video controls muted playsinline preload="metadata" src="videos/ex06_focus.mp4" title="矢印キーで Selected の黄色が移る"></video>
+<figcaption>矢印キーを押すたびに、黄色の印が START → OPTIONS → QUIT → OPTIONS → START と移ります</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>Play を始めた時点で START が黄色になっていて、<kbd>↓</kbd> と <kbd>↑</kbd> で黄色が上下に移ることを確認します。続けて OPTIONS をマウスでクリックし、カーソルを外しても OPTIONS が黄色のまま残ることも見ておきます。確かめたら Play を止めます。</p>
+
+<h4>クリックしたボタンの色が戻らない理由</h4>
+<p>Button は、マウスで押されたときにも自分を「選ばれたボタン」として EventSystem に登録します。そのため、クリックした後のボタンは Selected の状態のまま残り、ほかのボタンが選ばれるまで Selected Color で表示され続けます。マウスで遊ぶ人から見ると「押したのに色が戻らない」と感じる原因はここにあります。</p>
+<p>前の作例で Selected Color を Normal と同じ 220 にしたのは、この残り方を目立たせないためでした。</p>
+<p>一方、パッドやキーボードで遊ぶゲームでは、Selected がいま選ばれている唯一の手がかりです。メニューを開いた瞬間にどれか 1 つがはっきり選ばれている状態にしておくと、プレイヤーは最初の 1 回目から迷わずに済みます。原理編では、Selected の印は色だけでなく枠線や光など、色以外でも分かるものにすると読み違えが減るとしています。</p>
+
+<h2 id="ch4">4. 見た目の層：背景から浮いて見えるか</h2>
+<p>この層で守るのは、ボタンが背景からはっきり浮いて見えることです。形も文言もそろっているのに、塗りが背景に近い色で沈んでいる、という場面では、ボタンらしさを支える色の手がかりが効いていません。</p>
+<p>この章では、ボタンと背景の明るさの比を数字で表示し、目安を超えるまで色を調整します。</p>
+
+<h3>明るさの比を測って 3:1 を超える</h3>
+<p class="path">Assets/Lessons/H03_Affordance/Scenes/Ex07_ContrastRatio.unity</p>
+<p>ここまでの作例は、すべて暗い背景の上にボタンを置いていました。今度は明るい灰色のカードの上に、カードに近い色の BUY ボタンを置き、ボタンの Color だけを変えます。カードの下には、2 つの色の比と目安を満たしているかが表示されます。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>コントラスト比（contrast ratio）：2 つの色の明るさの差を、1:1（同じ）から 21:1（白と黒）までの比で表したものです</li>
+<li>ContrastReadout.cs：2 つの部品の色からコントラスト比を計算し、目安との比較を OK / NG で表示するスクリプトです</li>
+<li>Vertex Color：TextMeshPro の文字の色を決める欄です</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Ex07_ContrastRatio</code> をダブルクリックして開きます。カードの下に赤い文字で「1.38:1 (target 3:1) NG」と表示されています</li>
+<li>Hierarchy で <code>Card</code> の左の三角を開き、<code>Button_Buy</code> をクリックします</li>
+<li>Inspector の Image で Color の帯をクリックし、開いた Color ウィンドウの Hexadecimal に <code>3359A6</code>（濃い青）を入力して <kbd>Enter</kbd> を押します</li>
+<li>カードの下の表示が緑の「OK」に変わったことを確かめます</li>
+<li>Hierarchy で <code>Button_Buy</code> の左の三角を開き、子の <code>Text (TMP)</code> をクリックします</li>
+<li>Inspector の TextMeshPro - Text (UI) で Vertex Color の帯をクリックし、Hexadecimal に <code>FFFFFF</code>（白）を入力します</li>
+</ol>
+<div class="pair">
+<figure><img src="images/ex07_ng.png" alt="明るい灰色のカードの上に、灰色の BUY ボタン。下に赤い文字で 1.38:1 (target 3:1) NG" loading="lazy"><figcaption>変更前。ボタンとカードの比は 1.38:1 で、目安の 3:1 に届きません</figcaption></figure>
+<figure><img src="images/ex07_ok.png" alt="明るい灰色のカードの上に、濃い青の BUY ボタン、文字は白。下に緑の文字で 4.20:1 (target 3:1) OK" loading="lazy"><figcaption>変更後。濃い青にすると 4.20:1 になり、文字を白にしています</figcaption></figure>
+</div>
+<figure>
+<video controls muted playsinline preload="metadata" src="videos/ex07_contrast.mp4" title="ボタンの色を濃い青に変えると比が 1.38 から 4.20 になる"></video>
+<figcaption>ボタンの色を灰色から濃い青へ変えていくと、比が 1.38:1 から 4.20:1 に上がって OK になり、最後に文字を白にしています</figcaption>
+</figure>
+<figure>
+<img src="images/ex07_contrast_inspector.png" alt="ContrastReadout の Inspector。Contrast Readout (Script) の Foreground が Button_Buy (Image)、Background が Card (Image)、Label が ContrastReadout、Target が 3" loading="lazy">
+<figcaption>ContrastReadout の設定。Foreground に BUY ボタン、Background にカードを入れ、Target（目安）を 3 にしています</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>ボタンの色を変えると、Play しなくても表示が「NG」から「OK」に変わり、比が 3 を超えることを確認します。最後に BUY の文字が白になっていることも確かめます。</p>
+<p class="note">動画では Color を R 0.20、G 0.35、B 0.65（0〜1 の値）にしていて、比は 4.20:1 です。手順の <code>3359A6</code> はこの色を 0〜255 に丸めたもので、表示は 4.21:1 になります。</p>
+
+<h4>3:1 と 4.5:1 という目安</h4>
+<p>Web のアクセシビリティ（誰でも使えること）の指針 WCAG 2.2 は、ボタンの輪郭のような UI 部品には隣り合う色との比で 3:1 以上を、文字には背景との比で 4.5:1 以上を求めています。ゲームに守る義務はありませんが、「押せそうに見えるか」を測る物差しとして使えます。</p>
+<table>
+<tr><th>比べたもの</th><th>コントラスト比</th><th>目安との比較</th></tr>
+<tr><td>灰色のボタンとカード（変更前）</td><td>1.38:1</td><td>UI 部品の 3:1 に届かない</td></tr>
+<tr><td>濃い青のボタンとカード（変更後）</td><td>4.20:1</td><td>3:1 を超える</td></tr>
+<tr><td>濃い色の文字と濃い青のボタン</td><td>約 2.6:1</td><td>文字の 4.5:1 に届かない</td></tr>
+<tr><td>白い文字と濃い青のボタン</td><td>約 6.7:1</td><td>4.5:1 を超える</td></tr>
+</table>
+<p>ボタンを濃くすると、今度はボタンの上の文字が読みにくくなります。最初の暗い文字は、灰色のボタンの上では十分に読めましたが、濃い青の上では比が約 2.6:1 まで下がります。ボタンの色を変えたら文字の色も見直す、という順番で考えると、背景・ボタン・文字の 3 段がそろって見やすくなります。</p>
+
+<p>ContrastReadout.cs の全文です。配布物に入っているので書き写す必要はありませんが、要所の意味を読んでおきましょう。</p>
+<pre><code>using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+/// 2 つの Graphic（ボタンとその背景）の色からコントラスト比を計算し、TMP_Text に表示する。
+/// 式は WCAG 2.2 の相対輝度（sRGB をリニア化して 0.2126R + 0.7152G + 0.0722B）。
+/// Graphic.color の RGB だけを使う。アルファは背景に合成しない（両方とも不透明である前提）。
+/// [ExecuteAlways] なので、Play しなくても Inspector で色を変えるとすぐに表示が変わる。
+[ExecuteAlways]
+public class ContrastReadout : MonoBehaviour
+{
+    public Graphic foreground;   // 前景（例: ボタンの Image）
+    public Graphic background;   // 背景（例: ボタンが乗っているカードの Image）
+    public TMP_Text label;       // 結果を表示するテキスト
+    public float target = 3f;    // 目安（WCAG 2.2 の UI 部品は 3:1 以上）
+
+    static readonly Color OkColor = new Color(0.35f, 0.90f, 0.50f);
+    static readonly Color NgColor = new Color(1.00f, 0.40f, 0.40f);
+
+    /// 最後に計算したコントラスト比（1〜21）
+    public float Ratio { get; private set; }
+
+    void OnValidate() { Refresh(); }
+    void Update() { Refresh(); }
+
+    public void Refresh()
+    {
+        if (foreground == null || background == null || label == null)
+            return;
+        Ratio = ContrastRatio(foreground.color, background.color);
+        bool ok = Ratio &gt;= target;
+        label.text = $"{Ratio:0.00}:1  (target {target:0.#}:1)  {(ok ? "OK" : "NG")}";
+        label.color = ok ? OkColor : NgColor;
+    }
+
+    /// WCAG のコントラスト比 =（明るい方の輝度 + 0.05）÷（暗い方の輝度 + 0.05）
+    public static float ContrastRatio(Color a, Color b)
+    {
+        float la = RelativeLuminance(a);
+        float lb = RelativeLuminance(b);
+        float lighter = Mathf.Max(la, lb);
+        float darker = Mathf.Min(la, lb);
+        return (lighter + 0.05f) / (darker + 0.05f);
+    }
+
+    static float RelativeLuminance(Color c)
+    {
+        return 0.2126f * Linearize(c.r) + 0.7152f * Linearize(c.g) + 0.0722f * Linearize(c.b);
+    }
+
+    // Inspector の色（sRGB の 0〜1）を光の量に比例する値へ戻す
+    static float Linearize(float channel)
+    {
+        return channel &lt;= 0.03928f ? channel / 12.92f : Mathf.Pow((channel + 0.055f) / 1.055f, 2.4f);
+    }
+}</code></pre>
+<table>
+<tr><th>部分</th><th>していること</th></tr>
+<tr><td><code>[ExecuteAlways]</code></td><td>Play していないときも Update を動かします。Inspector で色を変えた瞬間に表示が変わるのはこのためです</td></tr>
+<tr><td><code>public Graphic foreground;</code> / <code>background;</code></td><td>比べる 2 つの部品です。Image も TextMeshPro も Graphic の仲間なので、どちらも入れられます</td></tr>
+<tr><td><code>public float target = 3f;</code></td><td>OK と NG を分ける目安です。文字を測るときは 4.5 にします</td></tr>
+<tr><td><code>void OnValidate() { Refresh(); }</code></td><td>Inspector で値が変わったときに計算し直します</td></tr>
+<tr><td><code>Ratio = ContrastRatio(...)</code></td><td>2 つの部品の Color から比を計算します。アルファ（透明度）は使わないので、不透明な部品どうしで測ります</td></tr>
+<tr><td><code>label.text = $"..."</code></td><td>「4.20:1 (target 3:1) OK」の形で表示し、OK なら緑、NG なら赤の文字にします</td></tr>
+<tr><td><code>ContrastRatio</code></td><td>明るい方と暗い方の輝度にそれぞれ 0.05 を足して割ります。白と黒なら (1 + 0.05) ÷ (0 + 0.05) = 21 で、最大の 21:1 になります</td></tr>
+<tr><td><code>RelativeLuminance</code></td><td>人の目の感じ方に合わせて、緑を最も重く（0.7152）、青を最も軽く（0.0722）足し合わせます</td></tr>
+<tr><td><code>Linearize</code></td><td>Inspector の 0〜1 の値は見た目に合わせて圧縮されているので、光の量に比例する値へ戻してから足し合わせます</td></tr>
+</table>
+
+<h3>やってみよう：ショップ画面の手がかりを数える</h3>
+<p class="path">Assets/Lessons/H03_Affordance/Scenes/Ex08_Example.unity</p>
+<p>ショップ画面の一例です。押せる部品と押せない部品を、手がかりの 5 つの観点でそれぞれ作り分けています。</p>
+<figure>
+<img src="images/ex08_example.png" alt="暗い紺のパネルに SHOP の見出し、右上に灰青の CLOSE ボタン、POTION 120 G と ELIXIR 480 G、それぞれの下にオレンジの BUY ボタン。下に緑の文字で 4.98:1 (target 3:1) OK" loading="lazy">
+<figcaption>作者の一例。購入ボタンとパネルの比は 4.98:1、閉じるボタンとパネルの比は 4.38:1 です</figcaption>
+</figure>
+<table>
+<tr><th>観点</th><th>この例での作り方</th></tr>
+<tr><td>形</td><td>BUY と CLOSE は角丸と影を付けています。価格は板も影も無い文字だけで、押せない顔をしています</td></tr>
+<tr><td>色</td><td>BUY はパネルからはっきり浮くオレンジ、CLOSE は控えめな灰青です</td></tr>
+<tr><td>文言</td><td>ボタンは BUY / CLOSE の動詞、価格は「120 G」の名詞です</td></tr>
+<tr><td>置き場所</td><td>BUY は各商品の下端、CLOSE はパネルの右上の内側に置いています</td></tr>
+<tr><td>状態（動き）</td><td>Ex05 と同じ Color Tint の色で、乗せると明るく、押すと暗くなります</td></tr>
+</table>
+<p>これを参考に、自分の画面のボタンを 5 つの観点で数えて直してみましょう。足りない手がかりを 1 つ足す直し方と、ボタンに似てしまっている飾りから手がかりを 1 つ減らす直し方の両方を試すと、違いがよく分かります。</p>
+
+<h2 id="ch5">5. 手がかりを設計してきた現場</h2>
+<p>今日はボタン 1 つの手がかりを扱いましたが、ゲームの作り手は画面全体、世界全体で同じことを考えています。この章では、原理編 第3章で紹介されている事例から 3 つを取り上げます。</p>
+
+<h3>ゲームは手がかりの言語を育てる</h3>
+<p>ゲームには、プレイ時間を通じて手がかりの言語をプレイヤーに教えられる、という有利な条件があります。ゼルダの伝説シリーズでは、ひび割れた壁は爆弾で壊せます。最初の一枚を壊した瞬間から、プレイヤーは世界中のひび割れを探し始めます。</p>
+<p>ただし、一度教えた言語は裏切れません。ひび割れの壁の一部だけが壊せないと、プレイヤーは爆弾を無駄にするたびに手がかり全体を信じなくなります。今日の Ex03 で見た「偽の手がかりは、本物のボタンの信用まで下げる」という話と同じです。</p>
+<p>一方で、言語を丸ごと書き換えることはできます。『ゼルダの伝説 ブレス オブ ザ ワイルド』の GDC 講演で、ディレクターの藤林秀麿さんは、シリーズの「お約束」だった越えられない壁を見直したと話しています。一部の壁だけをこっそり変えれば裏切りですが、壁全体の意味を同じ規則で変えれば新しい文法になる、と原理編では整理しています。</p>
+
+<h3>手がかりの量を逆算する：『TUNIC』</h3>
+<p>『TUNIC』は、拾い集める約 55 ページの取扱説明書が目玉のアクションアドベンチャーです。開発者のアンドリュー・シャウディスさんは GDC 2023 で、隠し要素ごとに「初回プレイで何パーセントの人に見つけてほしいか」を決めていたと話しました。</p>
+<p>ほぼ全員に来てほしい扉は 99% として、扉へ続く小道、光、アニメーション、特別な庇（ひさし）と手がかりを重ねました。序盤の隠し通路は 15% として、反対側に魅力的なアイテムを置いて目をそらしたそうです。今日の Ex02 では手がかりを 1 つずつ消しましたが、現場では目的から逆算して手がかりの量を増やしたり減らしたりしていることが分かります。</p>
+
+<h3>島が道を示す：『Ghost of Tsushima』</h3>
+<p>Sucker Punch のパーカー・ハミルトンさんは GDC 2021 で、『Ghost of Tsushima』が画面のコンパスを捨て、目的地へ風が吹く「導きの風」に置き換えた経緯を話しています。最初は森や雨の中で風の粒子が見分けにくかったため、風を強めて草木を大きくなびかせ、粒子に尾を引く帯を付けて区別できるようにしました。</p>
+<p>手がかりは、背景と区別できて初めて手がかりになります。これは今日の Ex07 で、ボタンとカードの比を 1.38:1 から 4.20:1 に上げたのと同じ話と言えます。</p>
+<p>UX の専門家セリア・ホデント（Celia Hodent）さんは、講演シリーズ The Gamer's Brain で、プレイヤーは説明書を読まず、見えている手がかりだけで行動する、と繰り返し伝えています。ボタンに気づいてもらえないのは、プレイヤーの能力ではなく手がかりの設計の問題だと考えると、直す場所が見えてきます。</p>
+<p class="note">出典：原理編『UnityDesignPrinciples』第3章。講演は藤林秀麿ほか "Change and Constant: Breaking Conventions with The Legend of Zelda: Breath of the Wild"（GDC 2017）、Andrew Shouldice "'TUNIC': This Was Here the Whole Time"（GDC 2023）、Parker Hamilton "Exploration in Ghost of Tsushima: Letting the Island Guide You"（GDC 2021）、Celia Hodent "The Gamer's Brain, Part 2"（GDC 2016）。四つの組み合わせは William W. Gaver "Technology Affordances"（CHI'91）、コントラスト比の目安は W3C の WCAG 2.2 によります。</p>
+
+<h2 id="ch6">6. まとめ</h2>
+<p>今日は、ボタンの「できること」（アフォーダンス）と「できると分かること」（シグニファイア）を分けて考え、手がかりが欠けたときに三つの層でそれぞれ何が起きるかを見て、別々の道具で直しました。</p>
+<ul>
+<li><strong>体験の層（手がかりの数・Raycast Target・Interactable）</strong>：押せるものが押せそうに、押せないものが押せなさそうに見えることを守りました。形・色・文言を 1 つ消すだけでボタンは素通りされやすくなり、ボタンに見える飾りは空振りを生みます。ゲイバーの四つの組み合わせでいえば、目指すのは知覚できるアフォーダンスと正しい拒否の 2 つです。</li>
+<li><strong>情報の層（Color Tint・Selected・First Selected）</strong>：押したこと、いま選ばれていることが伝わるようにしました。状態の色は掛け算なので、Normal を下げて明るくなる余地を作ります。パッドやキーボードでは Selected が唯一の手がかりになり、マウスではクリック後に残る Selected が「色が戻らない」の原因になります。</li>
+<li><strong>見た目の層（コントラスト比）</strong>：ボタンが背景から浮いて見えることを、数字で確かめました。UI 部品は 3:1、文字は 4.5:1 が目安で、ボタンの色を変えたら文字の色も見直します。</li>
+</ul>
+<p>Button の Inspector に並ぶ欄は、どれも「押せることをどう伝えるか」を決めるための道具でした。手がかりは作り手が答えを知っているほど見落としやすいので、自分の画面も 5 つの観点で一度数えてみると、直す場所が見つかりやすくなります。</p>
+
+<footer>
+<p>レベルデザイン基礎 2026 後期 演習 H03 ／ 参考：原理編『UnityDesignPrinciples』第3章</p>
+</footer>
+
+</main>
+</body>
+</html>
