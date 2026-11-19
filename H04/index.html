@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第4回：入力と即時反応</title>
+<style>
+:root {
+  --text: #1f2328;
+  --muted: #59636e;
+  --line: #d8dee4;
+  --accent: #2f6fde;
+  --code-bg: #f3f5f7;
+  --why: #e07a1f;
+  --bg: #ffffff;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+  font-size: 16.5px;
+  line-height: 1.8;
+}
+main { max-width: 760px; margin: 0 auto; padding: 40px 16px 96px; }
+header.page-head { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 28px; }
+header.page-head .series { color: var(--muted); font-size: 14px; margin: 0; }
+h1 { font-size: 30px; line-height: 1.4; margin: 6px 0 4px; }
+.date { color: var(--muted); font-size: 14px; margin: 0; }
+h2 { font-size: 24px; line-height: 1.45; margin: 64px 0 12px; padding-top: 12px; border-top: 2px solid var(--text); }
+h3 { font-size: 20px; line-height: 1.5; margin: 44px 0 6px; }
+h4 { font-size: 17px; margin: 28px 0 6px; padding-left: 12px; border-left: 4px solid var(--why); }
+p { margin: 0 0 14px; }
+ul, ol { margin: 0 0 16px; padding-left: 1.6em; }
+li { margin: 2px 0; }
+a { color: var(--accent); }
+code, kbd { font-family: "SFMono-Regular", Menlo, Consolas, monospace; font-size: 0.9em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; word-break: break-word; }
+kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: #fff; }
+.path { display: inline-block; max-width: 100%; margin: 0 0 12px; padding: 2px 10px; background: #1f2328; color: #f0f3f6; border-radius: 4px; font-family: "SFMono-Regular", Menlo, Consolas, monospace; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.label { font-weight: bold; margin: 18px 0 4px; }
+.check { background: #eef6ee; border-left: 4px solid #2e8b57; padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 16px 0; }
+.check strong { color: #22693f; }
+.note { background: #f6f8fa; border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; margin: 16px 0; font-size: 15.5px; }
+.download { border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; margin: 20px 0; background: #f8fafc; }
+.download h2 { all: unset; display: block; font-weight: bold; font-size: 17px; margin-bottom: 6px; }
+figure { margin: 18px 0 24px; }
+img, video { max-width: 100%; }
+figure img, figure video { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--line); background: #222; }
+figcaption { color: var(--muted); font-size: 14px; margin-top: 6px; line-height: 1.6; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pair figure { margin: 0; }
+.trio { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 18px 0 24px; }
+.trio figure { margin: 0; }
+@media (max-width: 560px) { .pair, .trio { grid-template-columns: 1fr; } }
+table { width: 100%; max-width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 15px; display: block; overflow-x: auto; }
+th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: #f3f5f7; }
+@media (max-width: 560px) { th, td { min-width: 6.5em; } }
+pre { max-width: 100%; background: #1f2328; color: #e6edf3; padding: 14px 16px; border-radius: 6px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; margin: 12px 0 18px; }
+pre code { background: none; padding: 0; color: inherit; word-break: normal; }
+nav.toc { border: 1px solid var(--line); border-radius: 8px; padding: 12px 18px; margin: 24px 0; font-size: 15px; }
+nav.toc ol { margin: 6px 0 0; }
+/* 入力が届く流れ（キーから処理まで）を左から右へ並べる。狭い画面では折り返す */
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 20px; padding: 0; list-style: none; font-size: 14.5px; }
+.flow li { margin: 0; padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; background: #f8fafc; }
+.flow li.arrow { border: 0; background: none; padding: 0 2px; color: var(--muted); }
+footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 12px; }
+</style>
+</head>
+<body>
+<main>
+<header class="page-head">
+<p class="series">レベルデザイン基礎 演習 H04</p>
+<h1>第4回：入力と即時反応</h1>
+<p class="date">2026-11-19</p>
+</header>
+
+<section class="download">
+<h2>本日の配布物</h2>
+<p><a href="H04_InputFeedback.unitypackage" download>H04_InputFeedback.unitypackage</a>（作例 Ex01〜Ex08 のシーン、入力の設定ファイル <code>H04Controls.inputactions</code>、8 本のスクリプト）</p>
+<p style="margin:0">前回までの <strong>DesignPrinciples2026</strong> プロジェクトをそのまま使います。取り込み方は、このページの 1 章の最初に書いています。</p>
+</section>
+
+<p>今日は、キーやゲームパッドの入力を受け取ってから、画面が反応するまでの流れを Unity で確かめます。押したキーと結果の並びを入れ替えたり、少し遅い・少し早いジャンプを許したり、反応をわざと遅らせたりして、プレイヤーの感じ方がどう変わるかを比べます。</p>
+<p>同じ日の講義（D04、原理編 第4章「対応付け・制約・エラー・フィードバック」）で聞いた話を、ここでは自分の手で再現します。章は、これまでと同じく三つの層の順に並べています。</p>
+
+<nav class="toc">
+<strong>目次</strong>
+<ol start="0">
+<li><a href="#ch0">はじめに：三つの層と、今日の問い</a></li>
+<li><a href="#ch1">準備：入力を受け取る仕組み</a></li>
+<li><a href="#ch2">体験の層：思ったとおりに動くか</a></li>
+<li><a href="#ch3">情報の層：反応と理由が伝わるか</a></li>
+<li><a href="#ch4">見た目の層：手応えの長さを作り分ける</a></li>
+<li><a href="#ch5">許しと手応えを設計してきた現場</a></li>
+<li><a href="#ch6">まとめ</a></li>
+</ol>
+</nav>
+
+<h2 id="ch0">0. はじめに：三つの層と、今日の問い</h2>
+<p>講義 D01（原理編 第1章）では、ゲームのデザインが扱う範囲を三つの層に分けました。</p>
+<ul>
+<li><strong>体験の層</strong>：操作したときの手応えや迷いにくさ</li>
+<li><strong>情報の層</strong>：何を、どんな順番で、どれくらいの強さで見せるか</li>
+<li><strong>見た目の層</strong>：色、形、レイアウト、フォント</li>
+</ul>
+<p>前回の H03 では、ボタンが「押せそう」に見える手がかりを扱いました。今日はその続きで、押した後に何が起きるかを扱います。問いは 1 つで、「操作したことに、どう応えるか」です。</p>
+<p>この問いには、講義 D04 の 3 つの言葉が役に立ちます。対応付け（mapping）は、操作するものと結果との対応関係のことです。左のキーで左のランプが光るなら、説明は要りません。</p>
+<p>許し（forgiveness）は、プレイヤーの小さな間違いを吸収する調整です。フィードバック（feedback）は、操作に対してシステムが返す反応で、速く・分かりやすく・操作に見合った強さで返すのがよいとされています。</p>
+<p class="note">配布シーンの Ex 番号は、Unity で作業しやすい順に付けています。今日はたまたま、層の順と Ex 番号の順がそろっています。</p>
+
+<h2 id="ch1">1. 準備：入力を受け取る仕組み</h2>
+<p>層の話に入る前に、配布物を取り込み、キーを押してからスクリプトが動くまでの道筋を確かめます。今日の作例は、どれもこの道筋で入力を受け取っています。</p>
+
+<h3>配布物を取り込む</h3>
+<p>配布の unitypackage を、H01 で作った DesignPrinciples2026 プロジェクト（Universal 3D のテンプレート）に取り込みます。H03 と同じ手順です。</p>
+<p class="label">手順</p>
+<ol>
+<li>Classroom の課題から <code>H04_InputFeedback.unitypackage</code> をダウンロードします</li>
+<li>Unity で DesignPrinciples2026 プロジェクトを開きます</li>
+<li>メニューバーの <strong>Assets → Import Package → Custom Package...</strong> をクリックします</li>
+<li>開いたウィンドウで、ダウンロードした <code>H04_InputFeedback.unitypackage</code> を選んで開きます</li>
+<li>取り込む中身の一覧が出たら、すべてにチェックが入っていることを確かめ、右下の <strong>Import</strong> をクリックします</li>
+</ol>
+<figure>
+<img src="images/ex00_import_dialog.png" alt="取り込む中身の一覧。上に H04_InputFeedback、その下に All と None のボタン。Lessons の下の H04_InputFeedback に H04Controls.inputactions、Scenes の 8 つのシーン、Scripts の 8 つのスクリプトがチェック付きで並び、各行の右に緑の New。右下に Cancel と Import" loading="lazy">
+<figcaption>取り込む中身の一覧。シーン 8 つ、スクリプト 8 本、H04Controls が入っています。New は、プロジェクトに新しく入るファイルの印です</figcaption>
+</figure>
+<figure>
+<img src="images/ex00_project_h04.png" alt="Project ウィンドウ。左のツリーで Assets、Lessons、H04_InputFeedback が選ばれ、右に Scenes フォルダ、Scripts フォルダ、H04Controls が並んでいる。下の帯に Assets/Lessons/H04_InputFeedback/H04Controls.inputactions" loading="lazy">
+<figcaption>取り込んだ後の Project ウィンドウ。<code>Assets/Lessons/H04_InputFeedback/</code> に入ります</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>Project ウィンドウの <code>Assets/Lessons/H04_InputFeedback/Scenes</code> に Ex01_InputAction から Ex08_Example までの 8 つのシーンがあり、同じフォルダに H04Controls があることを確認します。</p>
+<p class="note">シーンを開いて文字が出ないときは、TextMeshPro の部品が足りていません。メニューバーの <strong>Window → TextMeshPro → Import TMP Essential Resources</strong> をクリックし、開いたウィンドウで <strong>Import</strong> を押します（H03 で済ませていれば不要です）。</p>
+
+<h3>Space でランプを光らせる</h3>
+<p class="path">Assets/Lessons/H04_InputFeedback/Scenes/Ex01_InputAction.unity ／ PlayerInput</p>
+<p>Space キーを押すと、画面の真ん中のランプが黄色に光り、約 0.3 秒で元の暗い色に戻ります。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>Input System：キーボードやゲームパッドの操作を、「アクション（Action）」という名前の付いたやりたいことに結び付ける、Unity の入力の仕組みです</li>
+<li>H04Controls：どのキーがどのアクションになるかを書いた、入力の設定ファイル（Input Actions アセット）です</li>
+<li>Player Input：H04Controls を使って入力を受け取り、スクリプトへ届けるコンポーネントです</li>
+<li>PressEvents.cs：届いた入力を、Inspector に登録した処理（ここではランプを光らせる処理）に流すスクリプトです</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Assets/Lessons/H04_InputFeedback/Scenes/Ex01_InputAction</code> をダブルクリックして開きます</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押します</li>
+<li>Game ビューを 1 回クリックしてから、<kbd>Space</kbd> を数回押します</li>
+<li>もう一度 Play ボタンを押して止めます</li>
+<li>Hierarchy で <code>PlayerInput</code> をクリックし、Inspector に並ぶ 2 つのコンポーネントを見ます</li>
+<li>Project ウィンドウで <code>H04Controls</code> をダブルクリックし、開いた「H04Controls (Input Actions Editor)」のウィンドウで、アクションの一覧を見ます（H04Controls を選んだときの Inspector にある <strong>Edit Asset</strong> ボタンでも開けます）</li>
+</ol>
+<figure>
+<img src="images/ex01_editor_overview.png" alt="Ex01_InputAction を開いた Unity エディタ全体。左の Hierarchy に Main Camera、Directional Light、Canvas、EventSystem、PlayerInput があり、PlayerInput が選ばれている。中央の Game ビューは Full HD (1920x1080)、Scale 0.73x で、暗い灰色のランプと Delay 0.00 s、Fade 0.30 s Scale x1.00、Press SPACE。右の Inspector に Player Input と Press Events (Script)。下の Project ウィンドウに H04_InputFeedback の Scenes、Scripts、H04Controls" loading="lazy">
+<figcaption>Ex01_InputAction を開き、Hierarchy で PlayerInput を選んだところ。PlayerInput は Canvas の外（シーンのいちばん上の階層）に置いてあります</figcaption>
+</figure>
+<figure>
+<img src="images/ex01_playerinput_inspector.png" alt="PlayerInput の Inspector。Transform の下に Player Input があり、Actions が H04Controls (Input Action Asset)、Default Map が Player、UI Input Module と Camera が None、Behavior が Send Messages。①の赤枠は Behavior と、その下の Will SendMessage() to GameObject: OnDeviceLost, OnDeviceRegained, OnControlsChanged, OnPress, OnNotify, OnLeft, OnCenter, OnRight, OnJump の一覧。その下に Open Input Settings と Open Input Debugger のボタン。②の赤枠は Press Events (Script) の On Press () で、Runtime Only、LampFlash.Flash、対象 Lamp。On Notify () は空" loading="lazy">
+<figcaption>PlayerInput の Inspector。① Player Input の Behavior と、呼ばれるメソッドの一覧。② Press Events の On Press () に、ランプを光らせる処理が登録されています</figcaption>
+</figure>
+<table>
+<tr><th>欄</th><th>値</th><th>意味</th></tr>
+<tr><td>Player Input の Actions</td><td>H04Controls (Input Action Asset)</td><td>使う入力の設定ファイルです</td></tr>
+<tr><td>Player Input の Default Map</td><td>Player</td><td>最初に有効にするアクションの組（Action Map）です</td></tr>
+<tr><td>Player Input の Behavior</td><td>Send Messages</td><td>スクリプトへの届け方です。選択肢は Send Messages・Broadcast Messages・Invoke Unity Events・Invoke C Sharp Events の 4 つで、今日は Send Messages だけを使います</td></tr>
+<tr><td>Press Events の On Press ()</td><td>Runtime Only ／ LampFlash.Flash（対象は Lamp）</td><td>Space（Press アクション）が押されたときに呼ぶ処理の一覧です。Button の On Click () と同じ形をしています</td></tr>
+</table>
+<figure>
+<img src="images/ex01_inputactions_window.png" alt="H04Controls (Input Actions Editor) のウィンドウ。左の Action Maps に Player、中央の Actions に Press、Notify、Left、Center、Right、Jump の 6 つが並び、開いた Press の下に Space [Keyboard] と Button South [Gamepad]。右の Action Properties には Action Type が Button。右上に Save Asset と Auto-Save" loading="lazy">
+<figcaption>H04Controls (Input Actions Editor) のウィンドウ。Press の左の三角を開くと、Space [Keyboard] と Button South [Gamepad] の 2 つのバインドが見えます</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>Space を押した瞬間にランプが光り、約 0.3 秒で暗い色に戻ることを確認します。PlayerInput の Inspector で、Behavior が Send Messages、On Press () に Lamp の LampFlash.Flash が登録されていることも見ておきます。</p>
+<p class="note">Space を押しても光らないときは、Game ビューを 1 回クリックします。Unity は、Game ビューが選ばれているときだけキーの入力をゲームに渡すためです。</p>
+
+<h4>スクリプトは「Space」を知らない</h4>
+<p>H04Controls には、Player という組の中に 6 つのアクションがあります。キー（やパッドのボタン）とアクションを結ぶ線をバインド（binding）と呼びます。</p>
+<table>
+<tr><th>アクション</th><th>キーボード ／ ゲームパッド</th><th>使う作例</th></tr>
+<tr><td>Press</td><td><kbd>Space</kbd> ／ 下のボタン（Button South）</td><td>Ex01・Ex05・Ex07</td></tr>
+<tr><td>Notify</td><td><kbd>N</kbd> ／ 上のボタン（Button North）</td><td>Ex07</td></tr>
+<tr><td>Left</td><td><kbd>A</kbd>、<kbd>←</kbd> ／ 十字キーの左</td><td>Ex02</td></tr>
+<tr><td>Center</td><td><kbd>S</kbd>、<kbd>↓</kbd> ／ 十字キーの下</td><td>Ex02</td></tr>
+<tr><td>Right</td><td><kbd>D</kbd>、<kbd>→</kbd> ／ 十字キーの右</td><td>Ex02</td></tr>
+<tr><td>Jump</td><td><kbd>Space</kbd> ／ 下のボタン（Button South）</td><td>Ex03・Ex04・Ex08</td></tr>
+</table>
+<p>Behavior が Send Messages のとき、Player Input はアクションが押されるたびに、同じ GameObject にあるスクリプトから「On + アクション名」という名前のメソッドを探して呼びます。Press アクションなら <code>OnPress</code>、Jump アクションなら <code>OnJump</code> です。</p>
+<p>呼ばれる名前は、Inspector でも確かめられます。Behavior の下に出る「Will SendMessage() to GameObject: … OnPress, OnNotify, OnLeft, OnCenter, OnRight, OnJump」が、その一覧です。H04Controls の 6 つのアクションが、そのまま「On + アクション名」になって並んでいます（先頭の OnDeviceLost などの 3 つは、コントローラーが外れたときなどに呼ばれる名前です）。</p>
+<ol class="flow">
+<li><kbd>Space</kbd> を押す</li><li class="arrow">→</li>
+<li>H04Controls の Press</li><li class="arrow">→</li>
+<li>Player Input（Send Messages）</li><li class="arrow">→</li>
+<li>PressEvents の <code>OnPress</code></li><li class="arrow">→</li>
+<li>On Press () の一覧</li><li class="arrow">→</li>
+<li>Lamp の <code>Flash</code></li>
+</ol>
+<p>スクリプトが知っているのは「Press」という名前だけで、どのキーかは H04Controls だけが知っています。そのため、キーを変えたいときも、パッドで遊べるようにしたいときも、スクリプトを書き直さずに H04Controls のバインドを変えるだけで済みます。実際、ゲームパッドをつなぐと、パッドの下のボタンが Space と同じ働きをします。</p>
+
+<p>PressEvents.cs の全文です。配布物に入っているので書き写す必要はありませんが、要所の意味を読んでおきましょう。</p>
+<pre><code>using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.InputSystem;
+
+/// Player Input（Behavior = Send Messages）から届いた入力を、Inspector の一覧（UnityEvent）に流す。
+/// Button の On Click () と同じように、押したときに呼ぶ処理を Inspector で登録できる。
+/// - On Press () : Press アクション（Space キー）
+/// - On Notify (): Notify アクション（N キー）
+[RequireComponent(typeof(PlayerInput))]
+public class PressEvents : MonoBehaviour
+{
+    public UnityEvent onPress;
+    public UnityEvent onNotify;
+
+    // メソッド名は「On + アクション名」。Player Input が名前で探して呼ぶ
+    void OnPress(InputValue value)
+    {
+        onPress.Invoke();
+    }
+
+    void OnNotify(InputValue value)
+    {
+        onNotify.Invoke();
+    }
+}</code></pre>
+<table>
+<tr><th>部分</th><th>していること</th></tr>
+<tr><td><code>using UnityEngine.InputSystem;</code></td><td>Input System の部品（PlayerInput や InputValue）を使えるようにします</td></tr>
+<tr><td><code>[RequireComponent(typeof(PlayerInput))]</code></td><td>このスクリプトを付けると、同じ GameObject に Player Input も必ず付くようにします。入力を受ける部品とセットで使うためです</td></tr>
+<tr><td><code>public UnityEvent onPress;</code> / <code>onNotify;</code></td><td>Inspector に並べる処理の一覧です。Inspector では On Press () と On Notify () と表示されます</td></tr>
+<tr><td><code>void OnPress(InputValue value)</code></td><td>名前が「On + アクション名」なので、Press アクションが押されたときに Player Input から呼ばれます</td></tr>
+<tr><td><code>onPress.Invoke();</code></td><td>一覧に登録した処理を、上から順に全部呼びます。Ex01 ではランプの Flash、Ex07 では光・音・揺れの 3 つです</td></tr>
+<tr><td><code>void OnNotify(InputValue value)</code></td><td>Notify アクション（N キー）用の受け口です。Ex07 で使います</td></tr>
+<tr><td><code>InputValue value</code></td><td>押した値が入っています。今日のボタンのアクションでは使いません</td></tr>
+</table>
+<p class="note">Ex03・Ex04・Ex08 では、Player Input は Canvas の外ではなく、跳ぶ四角（<code>Player</code>）そのものに付いています。受け口の <code>OnJump</code> を持つスクリプトが、同じ GameObject にある必要があるからです。</p>
+
+<h3>Fade Time を 1 にする</h3>
+<p class="path">Assets/Lessons/H04_InputFeedback/Scenes/Ex01_InputAction.unity ／ Canvas / Lamp</p>
+<p>前の作例と同じランプの、消えるまでの秒数だけを 0.3 から 1 に変えます。光り始めは同じまま、約 1 秒かけてゆっくり消えるようになります。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>LampFlash.cs：<code>Flash()</code> を呼ばれると光り、決めた秒数をかけて元の色に戻すスクリプトです</li>
+<li>Fade Time：光ってから元の色に戻るまでの秒数です</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Play が止まっていることを確かめます</li>
+<li>Hierarchy で <code>Canvas</code> の左の三角をクリックして開き、<code>Lamp</code> をクリックします</li>
+<li>Inspector の <strong>Lamp Flash</strong> の Fade Time に <code>1</code> を入力し、<kbd>Enter</kbd> で確定します</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押し、Game ビューを 1 回クリックしてから <kbd>Space</kbd> を押します</li>
+<li>確かめたら、Play ボタンを押して止めます</li>
+</ol>
+<figure>
+<img src="images/ex01_lamp_inspector_fade1.png" alt="Lamp の Inspector。Rect Transform（Width 300、Height 300）、Canvas Renderer、Image の下に Lamp Flash (Script) があり、Off Color が暗い灰色、On Color が黄色、Delay 0、赤枠の Fade Time が 1、Punch Scale 1、Value Label が ValueLabel" loading="lazy">
+<figcaption>Lamp Flash の Fade Time（赤枠）を 1 にしたところ。ほかの欄は変えません</figcaption>
+</figure>
+<div class="pair">
+<figure><img src="images/ex01_game_lit.png" alt="Game ビュー。左上に H04 Ex01 Input Action、中央のランプが黄色に光り、下に Delay 0.00 s、Fade 0.30 s Scale x1.00、Press SPACE" loading="lazy"><figcaption>変更前。Space を押した直後の光ったランプ。下の表示は「Fade 0.30 s」です</figcaption></figure>
+<figure><img src="images/ex01_game_fade1.png" alt="Game ビュー。中央のランプが黄色に光り、下の表示が Delay 0.00 s、Fade 1.00 s Scale x1.00" loading="lazy"><figcaption>変更後。下の表示が「Fade 1.00 s」になり、光が長く残ります</figcaption></figure>
+</div>
+<figure>
+<video controls muted playsinline preload="metadata" src="videos/ex01_press.mp4" title="Fade Time 0.3 と 1 で、Space を押したランプの消え方を比べる"></video>
+<figcaption>前半は Fade 0.30 s で、Space を押すとランプが一瞬だけ光って消えます。後半は Fade Time を 1 にして、光った後に約 1 秒かけて暗い色に戻ります</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>ランプの下の表示が「Fade 1.00 s」に変わり、Space を押すと、光った後に約 1 秒かけてゆっくり消えることを確認します。押した瞬間に光る点は、変更前と同じです。</p>
+<p class="note">Play 中に Inspector で変えた値は、Play を止めると Play する前の値に戻ります。今日の作例では、値は Play を止めてから変え、もう一度 Play して確かめます。Play 中に変えた値を残したいときは、止める前に数字を書き留めておきましょう。</p>
+
+<h4>Fade Time を変えても、光り始めは変わらない</h4>
+<p>LampFlash は、光った時刻からの経過を Fade Time で割って、色を黄色から暗い色へ少しずつ戻しています。Fade Time が 0.3 なら 0.15 秒後に、1 なら 0.5 秒後に、黄色と暗い色のちょうど中間の色になります。</p>
+<p>変わるのは消え方（尾の長さ）だけで、光り始める時刻は Delay（光り始めるまでの遅れ）が決めています。Delay は 0 のままなので、どちらも押したフレームで光ります。Delay は 3 章の Ex05 で使います。</p>
+
+<p>LampFlash.cs の全文です。Ex01・Ex02・Ex05・Ex07・Ex08 のランプは、すべてこのスクリプトで光っています。</p>
+<pre><code>using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+/// Flash() を呼ぶと光り、fadeTime 秒かけて元の色に戻るランプ。
+/// - delay      : Flash() から光り始めるまでの遅れ（秒）。0 なら押したフレームで光る
+/// - punchScale : 光った瞬間の大きさ（1 で拡大なし、1.15 で 15% 大きく）
+/// - valueLabel : 入れておくと、delay・fadeTime・punchScale の今の値を表示する
+[RequireComponent(typeof(Image))]
+public class LampFlash : MonoBehaviour
+{
+    public Color offColor = new Color(0.25f, 0.27f, 0.32f);
+    public Color onColor = new Color(1f, 0.85f, 0.3f);
+    public float delay = 0f;
+    public float fadeTime = 0.3f;
+    public float punchScale = 1f;
+    public TMP_Text valueLabel;
+
+    Image _image;
+    float _litAt = -99f;      // 光った時刻
+    float _pendingAt = -1f;   // 光る予定の時刻（-1 = 予定なし）
+
+    void Awake()
+    {
+        _image = GetComponent&lt;Image&gt;();
+        _image.color = offColor;
+    }
+
+    public void Flash()
+    {
+        _pendingAt = Time.time + delay;
+    }
+
+    void Update()
+    {
+        if (_pendingAt &gt;= 0f &amp;&amp; Time.time &gt;= _pendingAt)
+        {
+            _litAt = Time.time;
+            _pendingAt = -1f;
+        }
+        // t は 1（光った直後）から 0（消えた）へ減っていく
+        float t = 1f - Mathf.Clamp01((Time.time - _litAt) / Mathf.Max(fadeTime, 0.01f));
+        _image.color = Color.Lerp(offColor, onColor, t);
+        transform.localScale = Vector3.one * Mathf.Lerp(1f, punchScale, t);
+        if (valueLabel != null)
+            valueLabel.text = $"Delay {delay:0.00} s\nFade {fadeTime:0.00} s   Scale x{punchScale:0.00}";
+    }
+}</code></pre>
+<table>
+<tr><th>部分</th><th>していること</th></tr>
+<tr><td><code>offColor</code> / <code>onColor</code></td><td>消えているときの暗い灰色と、光ったときの黄色です</td></tr>
+<tr><td><code>delay</code> / <code>fadeTime</code> / <code>punchScale</code></td><td>光り始めるまでの遅れ、消えるまでの秒数、光った瞬間の大きさです。Inspector では Delay、Fade Time、Punch Scale と表示されます</td></tr>
+<tr><td><code>public void Flash()</code></td><td>光る予定の時刻を「いま + delay」にします。On Press () などから呼ばれるのはこのメソッドです</td></tr>
+<tr><td><code>if (_pendingAt &gt;= 0f &amp;&amp; Time.time &gt;= _pendingAt)</code></td><td>予定の時刻が来たら、その時刻を光った時刻として覚えます。delay が 0 なら、Flash() と同じフレームで光ります</td></tr>
+<tr><td><code>float t = 1f - Mathf.Clamp01(...)</code></td><td>光った直後は 1、fadeTime 秒たつと 0 になる数を作ります</td></tr>
+<tr><td><code>Color.Lerp(offColor, onColor, t)</code></td><td>t が 1 なら黄色、0 なら暗い灰色、その間は混ぜた色にします</td></tr>
+<tr><td><code>Mathf.Lerp(1f, punchScale, t)</code></td><td>光った瞬間だけ punchScale 倍に大きくし、t と一緒に元の大きさへ戻します。1 なら大きさは変わりません</td></tr>
+<tr><td><code>valueLabel.text = ...</code></td><td>いまの Delay・Fade・Scale を画面に表示します。Inspector で値を変えると、表示もすぐ変わります</td></tr>
+</table>
+
+<h2 id="ch2">2. 体験の層：思ったとおりに動くか</h2>
+<p>この層で守るのは、プレイヤーが思ったとおりにゲームが動くことです。左を押したつもりが右が動いた、確かに押したのにジャンプが出なかった、という場面では、プレイヤーは自分の操作を信じられなくなります。</p>
+<p>この章では、まずキーと結果の並び（対応付け）を入れ替えて、迷いが増えることを確かめます。続けて、少し遅いジャンプと少し早いジャンプを許す 2 つの値を入れます。</p>
+
+<h3>キーとランプの並びを入れ替える</h3>
+<p class="path">Assets/Lessons/H04_InputFeedback/Scenes/Ex02_Mapping.unity ／ PlayerInput</p>
+<p>前の作例のランプを 3 つ横に並べ、A・S・D のキーで光らせるゲームにしました。白い印の下のランプを光らせると Hit、違うランプを光らせると Miss が増えます。Crossed をオンにすると、キーとランプの対応が入れ替わります。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>Left・Center・Right のアクション：<kbd>A</kbd>・<kbd>S</kbd>・<kbd>D</kbd>（矢印キーの <kbd>←</kbd>・<kbd>↓</kbd>・<kbd>→</kbd> でも可）です</li>
+<li>SwitchMapping.cs：どのキーでどのランプを光らせるかを決め、Hit と Miss を数えるスクリプトです</li>
+<li>Crossed：オンにすると、対応が A は右、S は左、D は中に入れ替わるチェックです</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Ex02_Mapping</code> をダブルクリックして開きます</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押し、Game ビューを 1 回クリックします</li>
+<li>白い印の下のランプに合うキー（左は <kbd>A</kbd>、中は <kbd>S</kbd>、右は <kbd>D</kbd>）を、10 回ほど押します</li>
+<li>画面下の Hit と Miss を見てから、Play を止めます</li>
+<li>Hierarchy で <code>PlayerInput</code> をクリックします</li>
+<li>Inspector の <strong>Switch Mapping</strong> の Crossed をクリックして、チェックを入れます</li>
+<li>Play を押し、Game ビューを 1 回クリックしてから、同じように 10 回ほど押します。確かめたら止めます</li>
+</ol>
+<figure>
+<img src="images/ex02_switchmapping_inspector_crossed.png" alt="PlayerInput の Inspector。Player Input の下に Switch Mapping (Script) があり、赤枠の Crossed にチェックが入っている。その下に Lamps 3、Marker、Score、Mode Label" loading="lazy">
+<figcaption>Switch Mapping の Crossed（赤枠）にチェックを入れたところ</figcaption>
+</figure>
+<div class="pair">
+<figure><img src="images/ex02_game_off.png" alt="上に Press the key under the white bar と、黄色の文字で Crossed: OFF (A = Left, S = Center, D = Right)。白い印は右のランプの上。3 つのランプの下に A、S、D のキー、いちばん下に Hit: 5 Miss: 0" loading="lazy"><figcaption>変更前。「Crossed: OFF」で、5 回押して Hit: 5、Miss: 0 です</figcaption></figure>
+<figure><img src="images/ex02_game_on.png" alt="同じ画面で、上の文字が Crossed: ON (A = Right, S = Left, D = Center)、いちばん下が Hit: 5 Miss: 5" loading="lazy"><figcaption>変更後。「Crossed: ON」で同じように押し続けると、Miss も 5 まで増えました</figcaption></figure>
+</div>
+<figure>
+<video controls muted playsinline preload="metadata" src="videos/ex02_mapping.mp4" title="Crossed のオフとオンで A・S・D を押し比べる"></video>
+<figcaption>Crossed がオフのときは、白い印の下のランプを 5 回とも当てて Hit: 5、Miss: 0 です。オンにして続けると、Miss が 5 まで増えます</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>上の表示が「Crossed: OFF」から「Crossed: ON   (A = Right, S = Left, D = Center)」に変わり、同じ回数を押しても Miss が増えることを確認します。押す前に「どのキーだったか」と考える時間が増えることにも注目します。</p>
+
+<h4>並びがずれると、覚えるのはプレイヤーになる</h4>
+<p>画面の A・S・D のキーの絵は、ランプと同じ横の位置（左から −360、0、360）に置いています。Crossed がオフのときは、見た位置のキーを押せば当たるので、覚えることがありません。</p>
+<p>Crossed をオンにしても、機能は同じで、3 つのランプはどれも光らせられます。変わったのは、対応を覚える手間をプレイヤーが払うようになったことです。講義 D04 では、良い対応付けは覚える必要そのものを消し、悪い対応付けは覚えるコストをプレイヤーに押しつける、と整理しました。</p>
+
+<p>SwitchMapping.cs の全文です。</p>
+<pre><code>using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+/// A / S / D キーと、左・中・右の 3 つのランプの対応付け。
+/// 印（marker）の下のランプを光らせるつもりでキーを押し、当たり（Hit）と外れ（Miss）を数える。
+/// crossed をオンにすると、キーとランプの対応が入れ替わる（A→右、S→左、D→中）。
+[RequireComponent(typeof(PlayerInput))]
+public class SwitchMapping : MonoBehaviour
+{
+    public bool crossed = false;
+    public LampFlash[] lamps;      // 左・中・右の順
+    public RectTransform marker;   // いま光らせたいランプの上に出る印
+    public TMP_Text score;
+    public TMP_Text modeLabel;     // いまの対応付けを表示する
+
+    static readonly int[] CrossedMap = { 2, 0, 1 };   // キーの番号 → ランプの番号
+    int _target, _hit, _miss;
+
+    void Start()
+    {
+        NextTarget();
+    }
+
+    void Update()
+    {
+        modeLabel.text = crossed
+            ? "Crossed: ON   (A = Right, S = Left, D = Center)"
+            : "Crossed: OFF   (A = Left, S = Center, D = Right)";
+    }
+
+    void OnLeft(InputValue value) { Press(0); }
+    void OnCenter(InputValue value) { Press(1); }
+    void OnRight(InputValue value) { Press(2); }
+
+    void Press(int key)
+    {
+        int lamp = crossed ? CrossedMap[key] : key;
+        lamps[lamp].Flash();
+        if (lamp == _target)
+            _hit++;
+        else
+            _miss++;
+        NextTarget();
+    }
+
+    void NextTarget()
+    {
+        // 直前と同じランプが続かないように、1〜2 個ずらす
+        _target = (_target + Random.Range(1, lamps.Length)) % lamps.Length;
+        var p = marker.anchoredPosition;
+        p.x = ((RectTransform)lamps[_target].transform).anchoredPosition.x;
+        marker.anchoredPosition = p;
+        score.text = $"Hit: {_hit}   Miss: {_miss}";
+    }
+}</code></pre>
+<table>
+<tr><th>部分</th><th>していること</th></tr>
+<tr><td><code>public bool crossed = false;</code></td><td>Inspector の Crossed です。オンにすると対応が入れ替わります</td></tr>
+<tr><td><code>public LampFlash[] lamps;</code></td><td>左・中・右の 3 つのランプです。0 番が左、1 番が中、2 番が右です</td></tr>
+<tr><td><code>static readonly int[] CrossedMap = { 2, 0, 1 };</code></td><td>Crossed のときの対応表です。キーの 0 番（A）は 2 番（右）、1 番（S）は 0 番（左）、2 番（D）は 1 番（中）を光らせます</td></tr>
+<tr><td><code>void OnLeft</code> / <code>OnCenter</code> / <code>OnRight</code></td><td>Left・Center・Right のアクションの受け口です。それぞれキーの番号 0・1・2 で <code>Press</code> を呼びます</td></tr>
+<tr><td><code>int lamp = crossed ? CrossedMap[key] : key;</code></td><td>Crossed がオフならキーと同じ番号、オンなら対応表の番号のランプを選びます</td></tr>
+<tr><td><code>if (lamp == _target) _hit++; else _miss++;</code></td><td>光らせたランプが白い印の下なら Hit、違えば Miss を 1 増やします</td></tr>
+<tr><td><code>NextTarget()</code></td><td>次に光らせるランプを選び、白い印をその上へ動かして、Hit と Miss を表示します。<code>Random.Range(1, lamps.Length)</code> で 1〜2 個ずらすので、同じランプが続きません</td></tr>
+<tr><td><code>modeLabel.text = crossed ? ...</code></td><td>いまの対応付けを、画面の上に毎フレーム表示します</td></tr>
+</table>
+
+<h3>端を過ぎてからのジャンプを許す（コヨーテタイム）</h3>
+<p class="path">Assets/Lessons/H04_InputFeedback/Scenes/Ex03_CoyoteTime.unity ／ Canvas / Stage / Player</p>
+<p>前の作例では、キーとランプの対応を扱いました。今度は 1 つのキー（Space）を押すタイミングを扱います。</p>
+<p>青い四角が右へ自動で歩くので、Space で隙間を跳び越えます。足場の端を過ぎて落ち始めてから押したジャンプを、何秒まで許すかを Coyote Time で決めます。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>Player：毎秒 500 px で右へ歩き、Space で跳ぶ青い四角です。Player Input、RunnerBody.cs、JumpTiming.cs が付いています</li>
+<li>JumpTiming.cs：Space が押されたときに、いま跳んでよいかを決め、結果を画面の Log に出すスクリプトです</li>
+<li>コヨーテタイム（Coyote Time）：足場の端を過ぎた後も、ジャンプを受け付ける秒数です</li>
+<li>RunnerBody.cs：四角を歩かせ、跳ばせ、落ちたかゴールしたかを数える動きの土台です。中身は読まなくてかまいません</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Ex03_CoyoteTime</code> をダブルクリックして開きます</li>
+<li>Hierarchy で <code>Canvas</code> の左の三角を開き、続けて <code>Stage</code> の左の三角を開いて、<code>Player</code> をクリックします</li>
+<li>Inspector の <strong>Jump Timing</strong> で、Coyote Time が <code>0</code> であることを確かめます</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押し、Game ビューを 1 回クリックします</li>
+<li>四角が足場の端を過ぎて落ち始めたら、すぐに <kbd>Space</kbd> を押します。画面上の Log と Result を見てから、Play を止めます</li>
+<li><code>Player</code> が選ばれたまま、Jump Timing の Coyote Time に <code>0.1</code> を入力し、<kbd>Enter</kbd> で確定します</li>
+<li>Play を押し、Game ビューを 1 回クリックしてから、さっきと同じように端を過ぎて落ち始めたらすぐ <kbd>Space</kbd> を押します。何度か試したら止めます</li>
+</ol>
+<figure>
+<img src="images/ex03_editor_overview.png" alt="Ex03_CoyoteTime を開いた Unity エディタ全体。Hierarchy で Canvas と Stage が開かれ、Platform_A、Platform_B、Player のうち Player が選ばれている。中央の Game ビューに Coyote Time 0.00 s Buffer Time 0.00 s、SPACE: Jump、Clear: 0 Fell: 0、左右 2 つの足場と、左の足場の上の青い四角。右の Inspector に Rect Transform、Image、Player Input、Runner Body (Script)" loading="lazy">
+<figcaption>Ex03_CoyoteTime を開いて Player を選んだところ。足場は 2 つで、間に隙間があります</figcaption>
+</figure>
+<figure>
+<img src="images/ex03_hierarchy_player.png" alt="左に Hierarchy、右に Inspector。Hierarchy は Ex03_CoyoteTime の下に Main Camera、Directional Light、Canvas、EventSystem。Canvas の下に Title、Stage、Settings、Log、Result、Caption、Stage の下に Platform_A、Platform_B、Player。赤枠の Player が選ばれ、Inspector に Rect Transform（Pos X -800、Pos Y -150、Width 60、Height 60）、Image、Player Input が見える" loading="lazy">
+<figcaption>Player（赤枠）は Canvas の中の Stage の中にあります。Player 自身に Player Input が付いています</figcaption>
+</figure>
+<figure>
+<img src="images/ex03_jumptiming_inspector_coyote01.png" alt="Player の Inspector。Rect Transform、Canvas Renderer、Image、Player Input は閉じてある。Runner Body (Script) の Platforms 2、Ground Y -150、Result。Jump Timing (Script) の赤枠の Coyote Time が 0.1、Buffer Time 0、Log、Settings Label、On Jump () は空" loading="lazy">
+<figcaption>Jump Timing の Coyote Time（赤枠）を 0.1 にしたところ</figcaption>
+</figure>
+<div class="trio">
+<figure><img src="images/ex03_game_start.png" alt="Play を始めた直後。上に Coyote Time 0.00 s Buffer Time 0.00 s、SPACE: Jump、Clear: 0 Fell: 0。左右 2 つの灰色の足場の間に隙間があり、左の足場の上に青い四角" loading="lazy"><figcaption>Play を始めた直後</figcaption></figure>
+<figure><img src="images/ex03_game_toolate.png" alt="Coyote Time 0.00 s のとき。Log に Too late: 0.05 s after the edge、Result に Clear: 0 Fell: 1。四角はスタートの位置に戻っている" loading="lazy"><figcaption>Coyote Time 0 で、端の 0.05 秒後に押した</figcaption></figure>
+<figure><img src="images/ex03_game_coyotejump.png" alt="Coyote Time 0.10 s のとき。Log に Coyote jump: 0.05 s after the edge、Result に Clear: 1 Fell: 1。四角はスタートの位置に戻っている" loading="lazy"><figcaption>Coyote Time 0.1 で、端の 0.05 秒後に押した（Fell: 1 は、先に Coyote Time 0 で落ちた 1 回です）</figcaption></figure>
+</div>
+<figure>
+<video controls muted playsinline preload="metadata" src="videos/ex03_coyote.mp4" title="端を過ぎてから押したジャンプが、Coyote Time 0 では落ち、0.1 では渡れる"></video>
+<figcaption>端を過ぎて 0.05 秒後に Space を押すと、Coyote Time 0 では Too late で隙間に落ちます。0.1 に変えて同じように押すと、Coyote jump で向こうの足場に渡ります</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>Coyote Time が 0 のとき、端を過ぎて 0.05 秒後に押すと Log に「Too late: 0.05 s after the edge」と出て、四角は落ち、Result の Fell が 1 増えることを確認します。0.1 にすると、同じ押し方で「Coyote jump: 0.05 s after the edge」と出て渡れ、Clear が 1 増えます（数字は押したタイミングで変わります）。</p>
+<table>
+<tr><th>Log の表示</th><th>意味</th></tr>
+<tr><td>Jump</td><td>足場の上で押した、ふつうのジャンプです</td></tr>
+<tr><td>Coyote jump: 0.05 s after the edge</td><td>端を過ぎた後で押しましたが、Coyote Time の内側だったので跳べました</td></tr>
+<tr><td>Too late: 0.05 s after the edge</td><td>Coyote Time を過ぎていたので、跳べませんでした</td></tr>
+</table>
+<p>Log の数字は、端を過ぎてから押すまでに何秒たっていたかです。画面の一番上には「Coyote Time 0.10 s   Buffer Time 0.00 s」のように、いまの値が出ます。</p>
+<p class="note">判定は 1 フレームごとに行われるので、動きの遅い PC では、ぎりぎりのタイミングの結果が最大 1 フレーム（約 0.03 秒）ぶれます。また Log の秒数は小数 2 桁に丸めて表示しているので、「Coyote Time 0.10 s」なのに「Too late: 0.10 s after the edge」と出ることがあります。このときの実際の値は、0.100 秒をわずかに超えています。</p>
+
+<h4>0.1 秒は 50 px ぶんの許し</h4>
+<p>四角は毎秒 500 px で歩くので、0.1 秒は 50 px 歩く時間です。Coyote Time 0.1 は、端を過ぎて 50 px 進むまでは、まだ足場の上にいるのと同じようにジャンプを受け付ける、という意味になります。</p>
+<p>Windows の Unity で、キーを押す操作をプログラムから送り、押すタイミングを変えて試した結果が次の表です。0.1 秒の内側の 0.03 秒と 0.08 秒だけが、Coyote Time 0.1 で救われています。</p>
+<table>
+<tr><th>Space を押したタイミング</th><th>Coyote Time 0</th><th>Coyote Time 0.1</th></tr>
+<tr><td>端の上（足場の上）</td><td>Jump → Clear</td><td>Jump → Clear</td></tr>
+<tr><td>端を 0.03 秒過ぎて</td><td>Too late → Fell</td><td>Coyote jump → Clear</td></tr>
+<tr><td>端を 0.08 秒過ぎて</td><td>Too late → Fell</td><td>Coyote jump → Clear</td></tr>
+<tr><td>端を 0.12 秒過ぎて</td><td>Too late → Fell</td><td>Too late → Fell</td></tr>
+</table>
+<p>コードの値から計算すると、ジャンプは約 0.8 秒の間に約 400 px 進み、隙間は 250 px です。足場の上で跳んで向こうに届くのは、端の手前 150 px（0.3 秒）の間に押したときだけで、Coyote Time 0.1 はこの 0.3 秒の後ろに 0.1 秒を足しています。</p>
+<p>プレイヤーから見ると、端ぎりぎりで押したつもりのジャンプは、実際には端を少し過ぎていることがよくあります。コヨーテタイムは、その小さなずれをミスにしないための値です。</p>
+
+<h3>着地より前のジャンプを覚えておく（入力バッファ）</h3>
+<p class="path">Assets/Lessons/H04_InputFeedback/Scenes/Ex04_InputBuffer.unity ／ Canvas / Stage / Player</p>
+<p>前の作例のコースに、狭い足場を 1 つ足して、足場を 3 つにしました。Coyote Time は 0.1 のままです。今度は遅いジャンプではなく、着地する少し前に押した早いジャンプを、何秒まで覚えておくかを Buffer Time で決めます。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>Platform_A・Platform_B・Platform_C：左から 1 つ目、真ん中、3 つ目の足場です。真ん中は幅 300 px で、歩くと 0.6 秒で渡り切ります。真ん中と 3 つ目の間の隙間は 50 px です</li>
+<li>入力バッファ（Buffer Time）：着地より前に押したジャンプを覚えておき、着地の瞬間に跳ばせる秒数です</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Ex04_InputBuffer</code> をダブルクリックして開きます</li>
+<li>Hierarchy で <code>Canvas</code> の左の三角を開き、続けて <code>Stage</code> の左の三角を開いて、<code>Player</code> をクリックします</li>
+<li>Inspector の <strong>Jump Timing</strong> で、Coyote Time が <code>0.1</code>、Buffer Time が <code>0</code> であることを確かめます</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押し、Game ビューを 1 回クリックします</li>
+<li>1 つ目の足場の端に近づいたら <kbd>Space</kbd> を押して跳びます</li>
+<li>下りてくるとき、真ん中の足場に着く直前に、もう一度 <kbd>Space</kbd> を押します。Log と Result を見てから、Play を止めます</li>
+<li><code>Player</code> が選ばれたまま、Jump Timing の Buffer Time に <code>0.1</code> を入力し、<kbd>Enter</kbd> で確定します</li>
+<li>Play を押し、Game ビューを 1 回クリックしてから、手順 5 と 6 を同じように行います。確かめたら止めます</li>
+</ol>
+<figure>
+<img src="images/ex04_jumptiming_inspector_buffer01.png" alt="Player の Inspector。Runner Body (Script) の Platforms 3、Ground Y -150、Result。Jump Timing (Script) の Coyote Time 0.1、赤枠の Buffer Time が 0.1、Log、Settings Label、On Jump () は空" loading="lazy">
+<figcaption>Jump Timing の Buffer Time（赤枠）を 0.1 にしたところ。Coyote Time は 0.1 のままです</figcaption>
+</figure>
+<div class="trio">
+<figure><img src="images/ex04_game_start.png" alt="Play を始めた直後。灰色の足場が 3 つあり、真ん中が狭い。左の足場の上に青い四角" loading="lazy"><figcaption>Play を始めた直後。真ん中の足場が狭いコースです</figcaption></figure>
+<figure><img src="images/ex04_game_ignored.png" alt="Buffer Time 0.00 s のとき。Log に Ignored: pressed と着地の何秒前に押したか、Result に Fell: 1" loading="lazy"><figcaption>Buffer Time 0 で、着地の少し前に押した</figcaption></figure>
+<figure><img src="images/ex04_game_buffered.png" alt="Buffer Time 0.10 s のとき。Log に Buffered jump: pressed と着地の何秒前に押したか、Result に Clear: 1" loading="lazy"><figcaption>Buffer Time 0.1 で、着地の少し前に押した</figcaption></figure>
+</div>
+<figure>
+<video controls muted playsinline preload="metadata" src="videos/ex04_buffer.mp4" title="着地の直前に押したジャンプが、Buffer Time 0 では捨てられ、0.1 では着地の瞬間に出る"></video>
+<figcaption>真ん中の足場に着く直前に Space を押すと、Buffer Time 0 では Ignored と出て次の隙間に落ち、0.1 では着地の瞬間に跳んで 3 つ目の足場に渡ります</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>Buffer Time が 0 のとき、着地の 0.07 秒前に押すと Log に「Ignored: pressed 0.07 s early」と出て、着地した後は跳ばずに歩き続け、Result の Fell が 1 増えることを確認します。0.1 にすると、同じ押し方で「Buffered jump: pressed 0.07 s early」と出て、着地の瞬間に跳び、Clear が 1 増えます（数字は押したタイミングで変わります）。</p>
+<p class="note">Clear にならないときは、1 回目のジャンプが早すぎて、真ん中の足場に届いていないことがあります。1 つ目の足場の端に近づいてから押します。真ん中の足場に乗れれば、着地の瞬間のジャンプは必ず 3 つ目の足場に届きます。</p>
+
+<h4>早すぎる入力は、ミスではなく意図の表明</h4>
+<p>Buffer Time が 0 のとき、跳んでいる最中に押した Space は、着地したときに捨てられます。プレイヤーは「次も跳ぶ」と決めて押しているのに、着地の瞬間ぴったりに押さないと跳べないので、操作がとても厳しく感じられます。</p>
+<p>Buffer Time 0.1 は、着地の 0.1 秒前（50 px 手前）から押したジャンプを覚えておき、着地の瞬間に出す、という意味です。コヨーテタイムは遅い入力を、入力バッファは早い入力を許します。向きが逆なだけで、どちらも小さなずれをミスにしないための値です。</p>
+
+<p>JumpTiming.cs の全文です。Ex03 と Ex04 の Log は、すべてこのスクリプトが出しています。</p>
+<pre><code>using TMPro;
+using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.InputSystem;
+
+/// Space（Jump アクション）を押したとき、いまジャンプしてよいかを決める。
+/// - coyoteTime : 足場の端を過ぎた後も、ジャンプを受け付ける秒数（コヨーテタイム）
+/// - bufferTime : 着地より前に押したジャンプを覚えておく秒数（入力バッファ）
+/// 判定の結果と、何秒ずれていたかを log に出す。
+[RequireComponent(typeof(PlayerInput))]
+[RequireComponent(typeof(RunnerBody))]
+public class JumpTiming : MonoBehaviour
+{
+    public float coyoteTime = 0f;
+    public float bufferTime = 0f;
+    public TMP_Text log;
+    public TMP_Text settingsLabel;   // いまの coyoteTime と bufferTime を表示する
+    public UnityEvent onJump;        // ジャンプした瞬間に呼ぶ処理（Ex08 で光と音をつなぐ）
+
+    RunnerBody _body;
+    float _pressedAt = -99f;         // ジャンプ中に押した時刻
+
+    void Start()
+    {
+        _body = GetComponent&lt;RunnerBody&gt;();
+        _body.Landed += OnLanded;
+    }
+
+    void Update()
+    {
+        settingsLabel.text = $"Coyote Time {coyoteTime:0.00} s   Buffer Time {bufferTime:0.00} s";
+    }
+
+    void OnJump(InputValue value)
+    {
+        float late = Time.time - _body.LeftAt;   // 端を過ぎてから何秒たったか
+        if (_body.Grounded)
+            Jump("Jump");
+        else if (_body.WalkedOff &amp;&amp; late &lt;= coyoteTime)
+            Jump($"Coyote jump: {late:0.00} s after the edge");
+        else if (_body.WalkedOff)
+            log.text = $"Too late: {late:0.00} s after the edge";
+        else
+            _pressedAt = Time.time;   // ジャンプ中に押した。着地したときに使う
+    }
+
+    void OnLanded()
+    {
+        float early = Time.time - _pressedAt;    // 着地の何秒前に押したか
+        _pressedAt = -99f;
+        if (early &lt;= bufferTime)
+            Jump($"Buffered jump: pressed {early:0.00} s early");
+        else if (early &lt;= 0.3f)
+            log.text = $"Ignored: pressed {early:0.00} s early";
+    }
+
+    void Jump(string message)
+    {
+        _body.Jump();
+        log.text = message;
+        onJump.Invoke();
+    }
+}</code></pre>
+<table>
+<tr><th>部分</th><th>していること</th></tr>
+<tr><td><code>coyoteTime</code> / <code>bufferTime</code></td><td>Inspector の Coyote Time と Buffer Time です。どちらも秒で、0 なら許しなしです</td></tr>
+<tr><td><code>public UnityEvent onJump;</code></td><td>跳んだ瞬間に呼ぶ処理の一覧です。Ex08 では、ここに光・音・揺れをつないでいます</td></tr>
+<tr><td><code>_body.Landed += OnLanded;</code></td><td>RunnerBody が着地したときに、<code>OnLanded</code> を呼んでもらうように登録します</td></tr>
+<tr><td><code>void OnJump(InputValue value)</code></td><td>Jump アクション（Space）の受け口です。押されるたびに、次の 4 つの場合に分かれます</td></tr>
+<tr><td><code>float late = Time.time - _body.LeftAt;</code></td><td>端を過ぎて落ち始めてから、何秒たったかを計算します。Log の数字はこの値です</td></tr>
+<tr><td><code>if (_body.Grounded)</code></td><td>1. 足場の上にいるなら、そのまま跳びます（Jump）</td></tr>
+<tr><td><code>else if (_body.WalkedOff &amp;&amp; late &lt;= coyoteTime)</code></td><td>2. 歩いて端から落ちている途中でも、Coyote Time 以内なら跳びます（Coyote jump）</td></tr>
+<tr><td><code>else if (_body.WalkedOff)</code></td><td>3. Coyote Time を過ぎていたら、跳ばずに Too late と表示します</td></tr>
+<tr><td><code>else _pressedAt = Time.time;</code></td><td>4. 跳んでいる最中に押したときは、押した時刻だけを覚えておきます</td></tr>
+<tr><td><code>void OnLanded()</code></td><td>着地したときに呼ばれます。<code>early</code> は、覚えていた時刻から着地までの秒数です</td></tr>
+<tr><td><code>if (early &lt;= bufferTime)</code></td><td>Buffer Time 以内に押していたら、着地の瞬間に跳びます（Buffered jump）</td></tr>
+<tr><td><code>else if (early &lt;= 0.3f)</code></td><td>間に合わなかった入力のうち、着地の 0.3 秒前までのものは Ignored と表示します。それより前の入力は何も表示せずに捨てます</td></tr>
+<tr><td><code>void Jump(string message)</code></td><td>実際に跳ばせ、Log を書き換え、On Jump () の一覧を呼びます</td></tr>
+</table>
+<p class="note">跳ぶ動きそのもの（毎秒 500 px で歩く、重力で落ちる、ゴールで Clear・落ちたら Fell を数える）は RunnerBody.cs が受け持っています。動きの土台なので、今日は読まなくてかまいません。配布物の <code>Scripts</code> フォルダに入っているので、気になる人は授業の後に開いてみましょう。</p>
+
+<h2 id="ch3">3. 情報の層：反応と理由が伝わるか</h2>
+<p>この層で守るのは、操作の結果がプレイヤーに伝わることです。押したのに反応が遅れて二度押ししてしまう、ボタンが押せないのに理由が書いていない、という場面では、操作はできても情報が届いていません。</p>
+<p>この章では、まず反応をわざと遅らせて、遅れを感じ始める境目を探します。続けて、押せないボタンに理由の一言を添えます。</p>
+
+<h3>反応の遅れを比べる</h3>
+<p class="path">Assets/Lessons/H04_InputFeedback/Scenes/Ex05_FeedbackDelay.unity ／ Canvas / Lamp_Right</p>
+<p>前の章では、押すタイミングのずれを許しました。今度は、押した後の反応のほうを遅らせます。</p>
+<p>Ex01 のランプを 3 つ並べ、光り始めるまでの遅れ（Delay）だけを、左から 0 秒・0.1 秒・0.3 秒にしました。Space を 1 回押すと、3 つのランプが少しずつずれて光ります。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>Lamp_Left・Lamp_Center・Lamp_Right：Delay がそれぞれ 0、0.1、0.3 のランプです。どれも Ex01 と同じ LampFlash.cs で光ります</li>
+<li>Delay：<code>Flash()</code> が呼ばれてから光り始めるまでの秒数です</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Ex05_FeedbackDelay</code> をダブルクリックして開きます</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押し、Game ビューを 1 回クリックしてから、<kbd>Space</kbd> を何回か押します</li>
+<li>左・中・右のランプが、それぞれいつ光ったかを見比べてから、Play を止めます</li>
+<li>Hierarchy で <code>Canvas</code> の左の三角を開き、<code>Lamp_Right</code> をクリックします</li>
+<li>Inspector の <strong>Lamp Flash</strong> の Delay に <code>0.15</code> を入力し、<kbd>Enter</kbd> で確定します</li>
+<li>Play を押し、Game ビューを 1 回クリックしてから <kbd>Space</kbd> を押して、右のランプの遅れを見ます。確かめたら止めます</li>
+<li>Delay を <code>0.05</code> に変えて、手順 6 を同じように行います</li>
+</ol>
+<figure>
+<img src="images/ex05_lampright_inspector_delay015.png" alt="Lamp_Right の Inspector。Rect Transform（Pos X 400、Width 240、Height 240）、Canvas Renderer、Image の下に Lamp Flash (Script)。赤枠の Delay が 0.15、Fade Time 0.3、Punch Scale 1、Value Label が ValueLabel_Right" loading="lazy">
+<figcaption>Lamp_Right の Delay（赤枠）を 0.15 にしたところ</figcaption>
+</figure>
+<div class="pair">
+<figure><img src="images/ex05_game_delays.png" alt="3 つのランプ。下にそれぞれ Delay 0.00 s、Delay 0.10 s、Delay 0.30 s の表示。Space を押した直後で、左のランプだけが光り、中と右はまだ暗い" loading="lazy"><figcaption>変更前。押した直後は、Delay 0.00 s の左のランプだけが光っています</figcaption></figure>
+<figure><img src="images/ex05_game_delay005.png" alt="3 つのランプがすべて光っていて、下の表示は左から Delay 0.00 s、Delay 0.10 s、Delay 0.05 s" loading="lazy"><figcaption>変更後。右のランプの表示が「Delay 0.05 s」になり、左のランプに近いタイミングで光ります</figcaption></figure>
+</div>
+<figure>
+<video controls muted playsinline preload="metadata" src="videos/ex05_delay.mp4" title="Space を押すと 3 つのランプが 0・0.1・0.3 秒の遅れで光る"></video>
+<figcaption>右のランプの Delay を 0.30、0.15、0.05 と変えながら Space を押しています。0.30 では右だけがはっきり遅れて光り、0.05 では左とほとんど同時に光ります</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>変更前は、左のランプが押した瞬間に光り、右のランプがはっきり遅れて光ることを確認します。右の Delay を 0.15、0.05 と下げると、ランプの下の表示が「Delay 0.15 s」「Delay 0.05 s」に変わり、右のランプの光り方が左に近づいていきます。</p>
+
+<h4>0.1 秒が境目と言われる理由</h4>
+<p>講義 D04 で扱ったように、人は操作から反応までが 0.1 秒を超えると「遅れた」と感じ始めます。今日の中のランプがちょうどこの境目で、右の 0.3 秒ははっきり遅れて見えます。</p>
+<p>配布シーンの自動テストで光った時刻を測ると、Delay 0.1 と 0.3 のランプは左のランプより 0.100 秒と 0.300 秒遅れ、右を 0.05 に変えると 0.050 秒の遅れになりました。Inspector の値のとおりに遅れていることが分かります。</p>
+<p>反応が遅れると、プレイヤーは押したことが届いたか分からず、二度押しするか、操作をやめてしまいます。どこから遅れを感じるかは人やゲームによって違うので、0.15 と 0.05 を試して、自分の境目を探してみましょう。</p>
+
+<h3>押せないボタンに理由を添える</h3>
+<p class="path">Assets/Lessons/H04_InputFeedback/Scenes/Ex06_LockedReason.unity ／ Canvas / Button_Left</p>
+<p>前の作例では反応の速さを扱いました。今度は、反応できないときに何を伝えるかを扱います。</p>
+<p>押せない SKILL ボタンが 2 つあり、右だけに「Unlocks at Lv.12」と理由が添えてあります。左にも同じ理由を入れます。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>Button_Left・Button_Right：Interactable のチェックを外した（押せない）SKILL ボタンです。H03 の Ex04 と同じ状態です</li>
+<li>LockedReason.cs：押せないボタンの下に理由を表示し、押されたら理由の文字を約 0.6 秒だけ黄色にするスクリプトです</li>
+<li>Reason：押せない理由の文字です。空のままだと何も表示しません</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Ex06_LockedReason</code> をダブルクリックして開きます</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押します</li>
+<li>Game ビューで右の SKILL ボタンをクリックし、続けて左の SKILL ボタンをクリックします。確かめたら Play を止めます</li>
+<li>Hierarchy で <code>Canvas</code> の左の三角を開き、<code>Button_Left</code> をクリックします</li>
+<li>Inspector の <strong>Locked Reason</strong> の Reason に <code>Unlocks at Lv.12</code> と入力し、<kbd>Enter</kbd> で確定します</li>
+<li>Play を押し、左の SKILL ボタンをクリックします。確かめたら止めます</li>
+</ol>
+<figure>
+<img src="images/ex06_lockedreason_inspector.png" alt="Button_Left の Inspector。Button の①赤枠の Interactable のチェックが外れていて、Transition は Color Tint。その下に Shadow と Locked Reason (Script)。②赤枠の Reason が Unlocks at Lv.12、その下に Label、Caption、Normal Color、Flash Color、Flash Time 0.6" loading="lazy">
+<figcaption>Button_Left の設定。① Button の Interactable は外れたまま、② Locked Reason の Reason に理由を入れています</figcaption>
+</figure>
+<div class="pair">
+<figure><img src="images/ex06_game_reason_flash.png" alt="2 つの青い SKILL ボタン。左の上に REASON: (empty) で、下には何も出ていない。右の上に REASON: set、右のボタンの下の Unlocks at Lv.12 が黄色に光っている" loading="lazy"><figcaption>変更前。右のボタンを押すと、理由の文字が黄色に光ります。左は押しても何も表示されません</figcaption></figure>
+<figure><img src="images/ex06_game_left_reason.png" alt="左右のボタンの上がどちらも REASON: set。左のボタンの下の Unlocks at Lv.12 が黄色に光り、右の理由は元の色" loading="lazy"><figcaption>変更後。左のボタンの下にも理由が出て、上の表示が「REASON: set」になります。左を押すと、理由が黄色に光ります</figcaption></figure>
+</div>
+<figure>
+<video controls muted playsinline preload="metadata" src="videos/ex06_locked.mp4" title="押せないボタンを押すと、理由の文字が黄色に光る"></video>
+<figcaption>変更前は、右のボタンを押すと「Unlocks at Lv.12」が黄色に光り、左のボタンを押しても何も表示されません。Reason を入れた後は、左のボタンにも理由が出て、押すと黄色に光ります</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>変更前は、右のボタンを押すと「Unlocks at Lv.12」がすぐに黄色になって約 0.6 秒で元の色に戻り、左のボタンを押しても画面には何も表示されないことを確認します。Reason を入れた後は、左のボタンの上の表示が「REASON: (empty)」から「REASON: set」に変わり、左を押しても理由が黄色に光ります。</p>
+
+<h4>グレーアウトは理由を語らない</h4>
+<p>押せないボタンを暗くするのは、講義 D04 でいう制約（constraint）で、いま押しても意味がないことを操作を封じて伝えています。ただし暗いボタンは、なぜ押せないのかまでは教えてくれません。</p>
+<p>左のボタンを押しても画面に何も表示されない状態は、プレイヤーを苛立たせます。「Unlocks at Lv.12」と一言添えるだけで、押せない理由が分かり、制約が不満から目標に変わります。押したときに理由を光らせるのは、「理由はここに書いてある」と目を向けさせるための小さなフィードバックです。</p>
+
+<p>LockedReason.cs の全文です。</p>
+<pre><code>using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+
+/// Interactable をオフにしたボタンに付ける。押せない理由（reason）を label に添える。
+/// 押せないボタンを押したときは、理由の文字を flashTime 秒だけ黄色にして「理由はここ」と知らせる。
+/// reason が空なら何も表示しない（理由を語らないグレーアウト）。
+[RequireComponent(typeof(Button))]
+public class LockedReason : MonoBehaviour, IPointerDownHandler
+{
+    public string reason = "";
+    public TMP_Text label;
+    public TMP_Text caption;   // 理由が入っているかを表示する（REASON: set / (empty)）
+    public Color normalColor = new Color(0.75f, 0.78f, 0.85f);
+    public Color flashColor = new Color(1f, 0.85f, 0.3f);
+    public float flashTime = 0.6f;
+
+    Button _button;
+    float _flashUntil = -1f;
+
+    void Start()
+    {
+        _button = GetComponent&lt;Button&gt;();
+    }
+
+    // 押した瞬間に呼ばれる（Interactable がオフでも、同じ GameObject のこのスクリプトには届く）
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (!_button.interactable)
+            _flashUntil = Time.time + flashTime;
+    }
+
+    void Update()
+    {
+        label.text = reason;
+        label.color = Time.time &lt; _flashUntil ? flashColor : normalColor;
+        caption.text = reason == "" ? "REASON: (empty)" : "REASON: set";
+    }
+}</code></pre>
+<table>
+<tr><th>部分</th><th>していること</th></tr>
+<tr><td><code>IPointerDownHandler</code></td><td>このスクリプトが「押された瞬間」の知らせを受け取れるようにします。受け取ると <code>OnPointerDown</code> が呼ばれます</td></tr>
+<tr><td><code>[RequireComponent(typeof(Button))]</code></td><td>Button と同じ GameObject に付けて使うスクリプトであることを示します</td></tr>
+<tr><td><code>public string reason = "";</code></td><td>Inspector の Reason です。空なら理由を表示しません</td></tr>
+<tr><td><code>flashColor</code> / <code>flashTime</code></td><td>押されたときの黄色と、黄色にしておく秒数（0.6 秒）です</td></tr>
+<tr><td><code>public void OnPointerDown(...)</code></td><td>ボタンが押された瞬間に呼ばれます。Interactable がオフのときだけ、黄色にする終わりの時刻を「いま + flashTime」にします</td></tr>
+<tr><td><code>label.text = reason;</code></td><td>ボタンの下の文字に、いまの Reason を毎フレーム入れます。Inspector で変えるとすぐに表示が変わります</td></tr>
+<tr><td><code>label.color = Time.time &lt; _flashUntil ? ... </code></td><td>終わりの時刻までは黄色、過ぎたら元の色にします</td></tr>
+<tr><td><code>caption.text = reason == "" ? ...</code></td><td>理由が入っているかどうかを、ボタンの上に「REASON: (empty)」か「REASON: set」で表示します</td></tr>
+</table>
+<p class="note">Interactable をオフにした Button は、クリックされても On Click () を呼びません。ただし押された知らせ自体は同じ GameObject のスクリプトに届くので、LockedReason はそれを使って理由を光らせています。</p>
+
+<h2 id="ch4">4. 見た目の層：手応えの長さを作り分ける</h2>
+<p>この層で守るのは、反応の見え方・聞こえ方・感じ方が、操作に見合っていることです。軽く押しただけなのに長く大きく揺れる、という場面では、反応はあっても「操作が届いた」のか「何かが起きた」のかが区別できません。</p>
+<p>この章では、光・音・揺れの長さを並べて、操作への手応えと通知を押し比べます。最後に、ここまでの許しと手応えを重ねた作者の一例を見ます。</p>
+
+<h3>手応えと通知を押し比べる</h3>
+<p class="path">Assets/Lessons/H04_InputFeedback/Scenes/Ex07_LightSound.unity ／ Canvas / TapLamp</p>
+<p>前の章では、反応の速さと、反応できないときの伝え方を扱いました。今度は、反応がどれだけ続くかを扱います。</p>
+<p>Ex01 のランプに、短い音と短い揺れを足したものが左の TAP です。右の NOTIFY は、電話の呼び出しのように長い音と長い揺れを返します。左の手応えの揺れの長さ（Duration）を、右の通知と同じ 0.8 秒にします。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>TapLamp（左、<kbd>Space</kbd>）：光って少し膨らみ、880 Hz（Hz は 1 秒に震える回数）の高い音を 0.05 秒鳴らし、0.06 秒揺れるランプです</li>
+<li>Phone（右、<kbd>N</kbd>）：220 Hz の低い音を 0.8 秒鳴らし、0.8 秒揺れる「CALL」の板です</li>
+<li>BeepSound.cs：音のファイルを使わず、決めた高さと長さの電子音をその場で作って鳴らすスクリプトです</li>
+<li>Rumble.cs：決めた長さ（Duration）と強さ（Strength）で揺らすスクリプトです。ゲームパッドがあればモーターを回し、画面の部品も小刻みに動かします</li>
+<li>長さの棒：揺れの長さを棒で見せます。棒いっぱい（500 px）が 1 秒です</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Ex07_LightSound</code> をダブルクリックして開きます</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押し、Game ビューを 1 回クリックしてから、<kbd>Space</kbd> を数回押します（音が出ます）</li>
+<li><kbd>N</kbd> を 1 回押し、揺れの長さと、下の棒の長さを左右で見比べます。確かめたら Play を止めます</li>
+<li>Hierarchy で <code>Canvas</code> の左の三角を開き、<code>TapLamp</code> をクリックします</li>
+<li>Inspector の <strong>Rumble</strong> の Duration に <code>0.8</code> を入力し、<kbd>Enter</kbd> で確定します</li>
+<li>Play を押し、Game ビューを 1 回クリックしてから <kbd>Space</kbd> を押して、揺れと棒を見ます。確かめたら止めます</li>
+</ol>
+<figure>
+<img src="images/ex07_rumble_inspector_duration08.png" alt="TapLamp の Inspector。Lamp Flash (Script) の Fade Time 0.2、Punch Scale 1.15。Audio Source。Beep Sound (Script) の Clip が None、Frequency 880、Duration 0.05、Volume 0.5。Rumble (Script) の赤枠の Duration が 0.8、Strength 0.5、Shake Target が TapLamp、Meter が Meter_Tap、Value Label が RumbleLabel_Tap" loading="lazy">
+<figcaption>TapLamp の Rumble の Duration（赤枠）を 0.8 にしたところ。Beep Sound と Lamp Flash は変えません</figcaption>
+</figure>
+<div class="trio">
+<figure><img src="images/ex07_game_idle.png" alt="左に TAP (SPACE): response to your action の見出しと暗いランプ、右に NOTIFY (N): something happened の見出しと CALL の板。左の下に Beep 880 Hz 0.05 s、Rumble 0.06 s x0.50 Gamepad: none と短い灰色の棒、右の下に Beep 220 Hz 0.80 s、Rumble 0.80 s x1.00 Gamepad: none と長い灰色の棒" loading="lazy"><figcaption>押す前。左の棒は 30 px、右の棒は 400 px です</figcaption></figure>
+<figure><img src="images/ex07_game_notify.png" alt="N を押した直後。右の長い棒が黄色に光り、左の短い棒は灰色のまま" loading="lazy"><figcaption>N を押した。右の棒が黄色に光る間、板が揺れ続けます</figcaption></figure>
+<figure><img src="images/ex07_game_tap_long.png" alt="Duration を 0.8 にした後。左の表示が Rumble 0.80 s x0.50 になり、左の棒が右と同じ長さになって黄色に光っている" loading="lazy"><figcaption>変更後に Space を押した。左の棒も 400 px になります</figcaption></figure>
+</div>
+<figure>
+<video controls muted playsinline preload="metadata" src="videos/ex07_light_rumble.mp4" title="Space の短い手応えと、N の長い通知を押し比べる"></video>
+<figcaption>前半は、Space で左のランプが一瞬だけ光って短い棒が光り、N で右の長い棒が 0.8 秒光り続けます。後半は TapLamp の Duration を 0.8 にして、Space でも左の棒が 400 px に伸び、長く光るようになります</figcaption>
+</figure>
+<table>
+<tr><th></th><th>TAP（Space）</th><th>NOTIFY（N）</th></tr>
+<tr><td>光</td><td>光って 1.15 倍に膨らみ、0.2 秒で戻る</td><td>なし</td></tr>
+<tr><td>音</td><td>880 Hz（高い）、0.05 秒</td><td>220 Hz（低い）、0.8 秒</td></tr>
+<tr><td>揺れ</td><td>0.06 秒、強さ 0.5（画面では最大 6 px）</td><td>0.8 秒、強さ 1.0（画面では最大 12 px）</td></tr>
+<tr><td>長さの棒</td><td>30 px</td><td>400 px</td></tr>
+</table>
+<p class="check"><strong>確認：</strong>変更前は、Space の揺れと音が一瞬で止み、N の揺れと音が長く続くことを確認します。TapLamp の Duration を 0.8 にすると、左の表示が「Rumble 0.80 s  x0.50」になり、棒が 30 px から 400 px に伸びて、Space を押しても揺れが 0.8 秒続きます。</p>
+<p class="note">ゲームパッドが無いときは、画面の揺れと棒で長さの違いを見ます。ゲームパッドをつなぐと、表示が「Gamepad: none」から「Gamepad: connected」に変わり、パッドの下のボタン（Button South）が Space、上のボタン（Button North）が N と同じ働きをして、手でもモーターの振動を感じられます。通知が鳴っている間に手応えを押しても、通知の振動は最後まで続きます。</p>
+
+<h4>手応えは短く、通知は長く</h4>
+<p>講義 D04 では、着信のバイブレーションとキーを打ったときの「コツッ」を比べました。通知は「何かが起きた」と向こうから知らせるもので、長く強く震えます。操作への手応え（フィードバック）は「あなたの操作が届いた」と確かめさせるもので、押した瞬間に短く返り、すぐに止みます。</p>
+<p>TapLamp の Duration を 0.8 にすると、操作は同じ Space なのに、揺れは通知と同じ長さになります。押すたびに 0.8 秒揺れ続けると、自分の操作への返事というより、何かが起きた知らせのように感じられるはずです。長さと強さで、2 つを作り分けます。</p>
+<p>スマートフォンでは、Unity 標準の <code>Handheld.Vibrate()</code> で端末を震わせられます。ただしこの機能はモバイル専用で、長さも強さも指定できず、振動の長さは OS が決めます。鳴らせるのは通知寄りの振動なので、今日の PC の演習では使わず、ゲームパッドのモーターと画面の揺れで長さと強さの違いを体験しました。</p>
+
+<p>BeepSound.cs の全文です。音のファイルを用意しなくても鳴るように、音をその場で作っています。</p>
+<pre><code>using TMPro;
+using UnityEngine;
+
+/// Play() で短い電子音を鳴らす。音は実行時に作るので、音のファイルを用意しなくてよい。
+/// - frequency : 音の高さ（Hz）。880 は高め、220 は低め
+/// - duration  : 音の長さ（秒）
+/// clip に音のファイルを入れた場合は、作った音ではなくそちらを鳴らす。
+[RequireComponent(typeof(AudioSource))]
+public class BeepSound : MonoBehaviour
+{
+    public AudioClip clip;
+    public float frequency = 880f;
+    public float duration = 0.05f;
+    [Range(0f, 1f)] public float volume = 0.5f;
+    public TMP_Text valueLabel;   // 入れておくと、いまの高さと長さを表示する
+
+    void Update()
+    {
+        if (valueLabel != null)
+            valueLabel.text = $"Beep {frequency:0} Hz   {duration:0.00} s";
+    }
+
+    public void Play()
+    {
+        var sound = clip != null ? clip : MakeBeep();
+        GetComponent&lt;AudioSource&gt;().PlayOneShot(sound, volume);
+    }
+
+    // サイン波を duration 秒ぶん並べる。終わりに向けて小さくし、「プツッ」という音を防ぐ
+    AudioClip MakeBeep()
+    {
+        int rate = AudioSettings.outputSampleRate;
+        int length = Mathf.Max(1, Mathf.RoundToInt(rate * duration));
+        var data = new float[length];
+        for (int i = 0; i &lt; length; i++)
+        {
+            float fade = 1f - (float)i / length;
+            data[i] = Mathf.Sin(2f * Mathf.PI * frequency * i / rate) * fade;
+        }
+        var beep = AudioClip.Create("Beep", length, 1, rate, false);
+        beep.SetData(data, 0);
+        return beep;
+    }
+}</code></pre>
+<table>
+<tr><th>部分</th><th>していること</th></tr>
+<tr><td><code>[RequireComponent(typeof(AudioSource))]</code></td><td>音を鳴らす部品（Audio Source）と同じ GameObject で使います</td></tr>
+<tr><td><code>frequency</code> / <code>duration</code> / <code>volume</code></td><td>音の高さ（Hz）、長さ（秒）、大きさ（0〜1）です。880 Hz は 1 秒に 880 回震える高めの音、220 Hz はその 4 分の 1 の低めの音です</td></tr>
+<tr><td><code>public void Play()</code></td><td><code>clip</code> に音のファイルが入っていればそれを、無ければ作った音を 1 回鳴らします</td></tr>
+<tr><td><code>AudioSettings.outputSampleRate</code></td><td>1 秒あたりの音の点の数です。たとえば 48000 なら、0.05 秒の音は 2400 個の点でできます</td></tr>
+<tr><td><code>Mathf.Sin(...) * fade</code></td><td>なめらかな波（サイン波）を並べ、終わりに向けて少しずつ小さくします。急に途切れたときの「プツッ」という音を防ぐためです</td></tr>
+<tr><td><code>AudioClip.Create(...)</code> / <code>SetData</code></td><td>並べた点から、鳴らせる音（AudioClip）を作ります</td></tr>
+</table>
+<p>Rumble.cs の全文です。</p>
+<pre><code>using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
+
+/// Play() で、duration 秒だけ揺らす。
+/// - ゲームパッドがつながっていれば、モーターを strength（0〜1）の強さで回す
+/// - 画面でも shakeTarget を小刻みに動かす（最大 strength × 12 px）。パッドが無くても違いが見える
+/// - meter（棒）の長さで duration を見せる（1 秒 = 500 px）。揺れている間は棒が黄色く光る
+/// 通知（長く強く）と、操作への手応え（短く弱く）を、duration と strength で比べる。
+/// モーターは 1 台なので、いくつかの Rumble が同時に揺れているときは一番強いものに合わせ、全部が止まったら 0 にする。
+public class Rumble : MonoBehaviour
+{
+    public float duration = 0.06f;
+    [Range(0f, 1f)] public float strength = 0.5f;
+    public RectTransform shakeTarget;
+    public RectTransform meter;
+    public TMP_Text valueLabel;
+
+    static readonly Color IdleColor = new Color(0.45f, 0.48f, 0.55f);
+    static readonly Color ActiveColor = new Color(1f, 0.85f, 0.3f);
+
+    // いま揺れている Rumble の一覧（static なので、すべての Rumble で 1 つを共有する）
+    static readonly List&lt;Rumble&gt; s_Playing = new List&lt;Rumble&gt;();
+
+    Vector2 _home;
+    float _endAt = -1f;   // 揺れを止める時刻（-1 = 揺れていない）
+
+    public bool IsPlaying =&gt; _endAt &gt;= 0f;
+
+    // ドメインの再読み込みを省いて Play したとき（Enter Play Mode Options）も、前回の一覧を残さない
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ClearPlaying()
+    {
+        s_Playing.Clear();
+    }
+
+    void Start()
+    {
+        if (shakeTarget != null)
+            _home = shakeTarget.anchoredPosition;
+    }
+
+    public void Play()
+    {
+        _endAt = Time.time + duration;
+        if (!s_Playing.Contains(this))
+            s_Playing.Add(this);
+        ApplyMotor();
+    }
+
+    void Update()
+    {
+        if (meter != null)
+        {
+            meter.sizeDelta = new Vector2(duration * 500f, meter.sizeDelta.y);
+            meter.GetComponent&lt;Image&gt;().color = IsPlaying ? ActiveColor : IdleColor;
+        }
+        if (valueLabel != null)
+            valueLabel.text = $"Rumble {duration:0.00} s  x{strength:0.00}   Gamepad: {(Gamepad.current != null ? "connected" : "none")}";
+        if (!IsPlaying)
+            return;
+        if (Time.time &lt; _endAt)
+        {
+            if (shakeTarget != null)
+                shakeTarget.anchoredPosition = _home + Random.insideUnitCircle * (strength * 12f);
+            return;
+        }
+        Stop();
+    }
+
+    void Stop()
+    {
+        _endAt = -1f;
+        if (shakeTarget != null)
+            shakeTarget.anchoredPosition = _home;
+        s_Playing.Remove(this);
+        ApplyMotor();
+    }
+
+    // 揺れている Rumble のうち、一番強い strength でモーターを回す。1 つも揺れていなければ 0（止める）
+    static void ApplyMotor()
+    {
+        if (Gamepad.current == null)
+            return;
+        float strongest = 0f;
+        foreach (var rumble in s_Playing)
+            strongest = Mathf.Max(strongest, rumble.strength);
+        Gamepad.current.SetMotorSpeeds(strongest, strongest);   // 低い周波数と高い周波数のモーター
+    }
+
+    // Play を止めたとき・シーンを切り替えたときに振動が残らないようにする（一覧から外して送り直す）
+    void OnDisable()
+    {
+        Stop();
+    }
+}</code></pre>
+<table>
+<tr><th>部分</th><th>していること</th></tr>
+<tr><td><code>duration</code> / <code>strength</code></td><td>Inspector の Duration（揺らす秒数）と Strength（強さ、0〜1）です</td></tr>
+<tr><td><code>shakeTarget</code> / <code>meter</code></td><td>画面で揺らす部品と、長さを見せる棒です。棒の長さは <code>duration * 500f</code> なので、0.06 秒は 30 px、0.8 秒は 400 px になります</td></tr>
+<tr><td><code>static readonly List&lt;Rumble&gt; s_Playing</code></td><td>いま揺れている Rumble の一覧です。static を付けた変数は、すべての Rumble で 1 つを共有します</td></tr>
+<tr><td><code>static void ClearPlaying()</code></td><td>Play を始めるときに一覧を空にします。前回の Play の一覧が残らないようにするためです</td></tr>
+<tr><td><code>public void Play()</code></td><td>止める時刻を「いま + duration」にし、自分を一覧に足してから、モーターの強さを決め直します</td></tr>
+<tr><td><code>Random.insideUnitCircle * (strength * 12f)</code></td><td>揺れている間、部品を元の位置から最大で strength × 12 px だけ毎フレームずらします。強さ 0.5 なら 6 px、1.0 なら 12 px です</td></tr>
+<tr><td><code>void Stop()</code></td><td>部品を元の位置に戻し、自分を一覧から外してから、モーターの強さを決め直します</td></tr>
+<tr><td><code>static void ApplyMotor()</code></td><td>一覧の中で一番強い strength でモーターを回し、一覧が空なら 0（止める）を送ります。モーターは 1 台なので、TAP と NOTIFY が重なっても、通知の振動が途中で止まらないようにしています</td></tr>
+<tr><td><code>Gamepad.current</code></td><td>いまつながっているゲームパッドです。つながっていなければ null で、モーターには何も送りません</td></tr>
+<tr><td><code>void OnDisable()</code></td><td>Play を止めたときやシーンを切り替えたときに、振動が残らないように止めます</td></tr>
+</table>
+
+<h3>やってみよう：自分のジャンプに許しと手応えを足す</h3>
+<p class="path">Assets/Lessons/H04_InputFeedback/Scenes/Ex08_Example.unity ／ Canvas / Stage / Player</p>
+<p>前の作例の短い手応えを、Ex04 のジャンプに重ねた作者の一例です。Coyote Time と Buffer Time はどちらも 0.1 で、跳んだ瞬間に四角が白く光って膨らみ、短い音が鳴り、足場ごと画面が小さく揺れます。</p>
+<figure>
+<img src="images/ex08_game_jump.png" alt="Ex08 の Game ビュー。3 つの足場の上で青い四角が跳び、白く光って少し大きくなっている。上に Coyote Time 0.10 s Buffer Time 0.10 s" loading="lazy">
+<figcaption>作者の一例。跳んだ瞬間に、四角が白く光って 1.25 倍に膨らみます</figcaption>
+</figure>
+<figure>
+<video controls muted playsinline preload="metadata" src="videos/ex08_example.mp4" title="許しと光・音・揺れを重ねたジャンプ"></video>
+<figcaption>跳ぶたびに四角が光って膨らみ、足場ごと画面が一瞬だけ小さく揺れます（動画は無音です）</figcaption>
+</figure>
+<figure>
+<img src="images/ex08_player_inspector.png" alt="Ex08 の Player の Inspector。Jump Timing (Script) の①赤枠の Coyote Time 0.1 と Buffer Time 0.1、②赤枠の On Jump () に Runtime Only の LampFlash.Flash、BeepSound.Play、Rumble.Play の 3 つ（対象はどれも Player）。その下に閉じた Lamp Flash、Audio Source、Beep Sound、Rumble" loading="lazy">
+<figcaption>Player の Inspector。① 許しの 2 つの値、② On Jump () に光・音・揺れの 3 つをつないでいます</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>Ex08_Example を開いて Play し、Game ビューを 1 回クリックしてから Space で跳ぶと、跳ぶたびに四角が白く光って膨らみ、短い音が鳴り、足場ごと画面が小さく揺れることを確認します。</p>
+<table>
+<tr><th>観点</th><th>この例での作り方</th></tr>
+<tr><td>許し</td><td>Jump Timing の Coyote Time と Buffer Time を、どちらも 0.1 にしています</td></tr>
+<tr><td>光</td><td>Player に Lamp Flash を付け、Off Color を青、On Color を白、Fade Time を 0.15、Punch Scale を 1.25 にしています</td></tr>
+<tr><td>音</td><td>Beep Sound の Frequency を 660、Duration を 0.06 にしています</td></tr>
+<tr><td>揺れ</td><td>Rumble の Duration を 0.05、Strength を 0.4 にし、Shake Target に Stage を入れて、足場ごと画面を最大 4.8 px 揺らしています</td></tr>
+<tr><td>長さ</td><td>光は 0.15 秒、音は 0.06 秒、揺れは 0.05 秒で、どれも操作への手応えとして短く止まります</td></tr>
+</table>
+<p>これを参考に、Ex03 や Ex04 の Player を自分のジャンプに見立てて、許しを足す直し方と、手応えを 1 つ足す直し方を試してみましょう。手応えを長くしすぎると、Ex07 で見たように通知のように感じられることもあるので、長さを変えながら押し比べると違いがよく分かります。</p>
+
+<h2 id="ch5">5. 許しと手応えを設計してきた現場</h2>
+<p>今日はジャンプ 1 回、ボタン 1 つの反応を扱いましたが、ゲームの作り手は同じことを数字と指針にして積み重ねてきました。この章では、原理編 第4章で紹介されている事例から 3 つを取り上げます。</p>
+
+<h3>許しを数字にする：『Celeste』とフォーギブネス</h3>
+<p>公開されている『Celeste』のソースコードでは、コヨーテタイムが 0.1 秒に設定されています。今日の Ex03 で入れた 0.1 は、この値です。足場を離れた直後に押したジャンプも、ミスにしないための値と言えます。</p>
+<p>セス・コスター（Seth Coster）さんは、この種の調整をフォーギブネス（forgiveness）と呼び、GDC で一本の講演にまとめています。プレイヤーの入力を額面どおりに処理せず意図を汲む、という考え方で、数フレーム早いジャンプはミスではなく意図の表明だとしています。</p>
+<p>Ex03 と Ex04 で入れた値は、機械の正しさよりもプレイヤーの意図を優先する値でした。同じ 0.1 秒でも、入れるかどうかで「押したのに跳べなかった」という不満が生まれるかどうかが変わります。</p>
+
+<h3>フィードバックはご褒美である前に情報：Game Feel の講演</h3>
+<p>ニコラエ・ベルベチェ（Nicolae Berbece）さんは、GDC Europe 2015 の講演「Game Feel: Why Your Death Animation Sucks」で、キャラクターが倒れる一瞬を題材に、コードの一行目から効果音、画面の揺れ、パーティクルまでを順に足していきました。反応の良さと見せ方で、体感がどう変わるかを実演した講演です。</p>
+<p>原理編では、ここから「フィードバックは、ご褒美である前に情報」という点を押さえています。派手にすることが目的ではなく、操作が世界に届いたという事実を、確実に、即座に知らせることが先にあり、その上で気持ちよさの演出が乗ります。今日の Ex05 の遅れと Ex07 の光・音・揺れは、この順序で見ると理解しやすくなります。</p>
+
+<h3>触覚の使い分け：iOS と Android の指針</h3>
+<p>スマートフォンのキーボードを打ったときの小さな感触は、ハプティクス（haptics）と呼ばれる、触覚でフィードバックを返す仕組みです。iOS の API（プログラムから呼び出せる機能の窓口）には、ものがぶつかったり、はまり込んだりする瞬間に使う Impact、選択が切り替わったときの Selection、成功・警告・失敗を伝える Notification といった種類が用意されています。</p>
+<p>Android の開発者向け指針は、スクロールのように頻繁に起きることには弱い効果を、送信の確定のような重要なことには強い効果を割り当てるよう勧めています。同じ指針は、しびれが残るような雑な振動（buzzy haptics）しか出せないなら、触覚は付けないほうがよいとまで書いています。</p>
+<p>Unity でこうした手応えを返すには、<code>Handheld.Vibrate()</code> ではなく、iOS の <code>UIImpactFeedbackGenerator</code> や Android の <code>performHapticFeedback</code> を、ネイティブプラグイン（OS の機能を直接呼ぶための追加の部品）を通して呼ぶことになります。雑な反応は、反応が無いよりも悪いことがある、と覚えておくと、Ex07 の長さと強さを決めるときの手がかりになります。</p>
+<p class="note">出典：原理編『UnityDesignPrinciples』第4章。対応付け・制約・フィードバックの枠組みは D. A. ノーマン『誰のためのデザイン？』、講演は Nicolae Berbece "Game Feel: Why Your Death Animation Sucks"（GDC Europe 2015）、触覚の指針は Android Developers の "Haptics design principles" と Apple の Human Interface Guidelines "Playing haptics" によります。</p>
+
+<h2 id="ch6">6. まとめ</h2>
+<p>今日は、キーを押してからスクリプトが動くまでの道筋を確かめ、その上で、操作にどう応えるかを三つの層に分けて、別々の値で調整しました。</p>
+<ul>
+<li><strong>準備（Player Input・H04Controls・Send Messages）</strong>：キーとアクションを結ぶのは H04Controls だけで、スクリプトは「On + アクション名」のメソッドでアクションの名前だけを受け取ります。キーを変えてもパッドをつないでも、スクリプトはそのままで動きます。</li>
+<li><strong>体験の層（Crossed・Coyote Time・Buffer Time）</strong>：プレイヤーが思ったとおりに動くことを守りました。対応付けがずれると、機能は同じでも覚えるコストをプレイヤーが払います。遅い入力はコヨーテタイムで、早い入力は入力バッファで、0.1 秒（50 px）ぶん許しました。</li>
+<li><strong>情報の層（Delay・Reason）</strong>：操作の結果が伝わることを守りました。反応は 0.1 秒を超えると遅れて感じ始めます。押せないボタンには、理由の一言を添えます。</li>
+<li><strong>見た目の層（Duration・Strength）</strong>：反応が操作に見合うことを守りました。操作への手応えは短く、通知は長くして、光・音・揺れの長さで「届いた」と「起きた」を作り分けます。</li>
+</ul>
+<p>Inspector で変えた値は、どれも「操作したことに、どう応えるか」を決めるための数字でした。目安はどれも 0.1 秒前後に集まっていたので、自分のゲームでも、まず 0.1 秒から試して押し比べると、直す場所が見つかりやすくなります。</p>
+
+<footer>
+<p>レベルデザイン基礎 2026 後期 演習 H04 ／ 参考：原理編『UnityDesignPrinciples』第4章、実装編『Unity Design』第1章（uGUI）・第11章（InputSystem）</p>
+</footer>
+
+</main>
+</body>
+</html>
