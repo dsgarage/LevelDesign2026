@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第5回：注意を導く演出</title>
+<style>
+:root {
+  --text: #1f2328;
+  --muted: #59636e;
+  --line: #d8dee4;
+  --accent: #2f6fde;
+  --code-bg: #f3f5f7;
+  --why: #e07a1f;
+  --bg: #ffffff;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+  font-size: 16.5px;
+  line-height: 1.8;
+}
+main { max-width: 760px; margin: 0 auto; padding: 40px 16px 96px; }
+header.page-head { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 28px; }
+header.page-head .series { color: var(--muted); font-size: 14px; margin: 0; }
+h1 { font-size: 30px; line-height: 1.4; margin: 6px 0 4px; }
+.date { color: var(--muted); font-size: 14px; margin: 0; }
+h2 { font-size: 24px; line-height: 1.45; margin: 64px 0 12px; padding-top: 12px; border-top: 2px solid var(--text); }
+h3 { font-size: 20px; line-height: 1.5; margin: 44px 0 6px; }
+h4 { font-size: 17px; margin: 28px 0 6px; padding-left: 12px; border-left: 4px solid var(--why); }
+p { margin: 0 0 14px; }
+ul, ol { margin: 0 0 16px; padding-left: 1.6em; }
+li { margin: 2px 0; }
+a { color: var(--accent); }
+code, kbd { font-family: "SFMono-Regular", Menlo, Consolas, monospace; font-size: 0.9em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; word-break: break-word; }
+kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: #fff; }
+.path { display: inline-block; max-width: 100%; margin: 0 0 12px; padding: 2px 10px; background: #1f2328; color: #f0f3f6; border-radius: 4px; font-family: "SFMono-Regular", Menlo, Consolas, monospace; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.label { font-weight: bold; margin: 18px 0 4px; }
+.check { background: #eef6ee; border-left: 4px solid #2e8b57; padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 16px 0; }
+.check strong { color: #22693f; }
+.note { background: #f6f8fa; border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; margin: 16px 0; font-size: 15.5px; }
+.download { border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; margin: 20px 0; background: #f8fafc; }
+.download h2 { all: unset; display: block; font-weight: bold; font-size: 17px; margin-bottom: 6px; }
+figure { margin: 18px 0 24px; }
+img, video { max-width: 100%; }
+figure img, figure video { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--line); background: #222; }
+figcaption { color: var(--muted); font-size: 14px; margin-top: 6px; line-height: 1.6; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pair figure { margin: 0; }
+.trio { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 18px 0 24px; }
+.trio figure { margin: 0; }
+@media (max-width: 560px) { .pair, .trio { grid-template-columns: 1fr; } }
+table { width: 100%; max-width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 15px; display: block; overflow-x: auto; }
+th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: #f3f5f7; }
+@media (max-width: 560px) { th, td { min-width: 6.5em; } }
+pre { max-width: 100%; background: #1f2328; color: #e6edf3; padding: 14px 16px; border-radius: 6px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; margin: 12px 0 18px; }
+pre code { background: none; padding: 0; color: inherit; word-break: normal; }
+nav.toc { border: 1px solid var(--line); border-radius: 8px; padding: 12px 18px; margin: 24px 0; font-size: 15px; }
+nav.toc ol { margin: 6px 0 0; }
+/* 入力が届く流れ（キーから処理まで）を左から右へ並べる。狭い画面では折り返す */
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 20px; padding: 0; list-style: none; font-size: 14.5px; }
+.flow li { margin: 0; padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; background: #f8fafc; }
+.flow li.arrow { border: 0; background: none; padding: 0 2px; color: var(--muted); }
+footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 12px; }
+details.hint { border: 1px solid var(--line); border-radius: 6px; padding: 8px 14px; margin: 10px 0; background: #fafbfc; }
+details.hint summary { cursor: pointer; font-weight: bold; }
+details.hint[open] summary { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<main>
+<header class="page-head">
+<p class="series">レベルデザイン基礎 演習 H05</p>
+<h1>第5回：注意を導く演出</h1>
+<p class="date">2026-11-26</p>
+</header>
+
+<section class="download">
+<h2>本日の配布物</h2>
+<p><a href="H05_GuideAttention.unitypackage" download>H05_GuideAttention.unitypackage</a>（作例 Ex01〜Ex08 のシーン 11 本、入力の設定ファイル <code>H05Controls.inputactions</code>、8 本のスクリプト、Animation・Timeline・Signal のアセット）</p>
+<p style="margin:0">前回までの <strong>DesignPrinciples2026</strong> プロジェクトをそのまま使います。取り込み方は、このページの 1 章の最初に書いています。</p>
+</section>
+
+<p>今日は、プレイヤーの目と頭の使い方に合わせて、案内を出す場所・順番・止める時刻・強さを Unity で決めます。全部を目立たせた画面と 1 つだけ目立たせた画面で探す時間を比べたり、案内を Timeline に並べて 1 つずつ出したり、案内を出した所でゲームを止めて、押すと続きが流れる形にしたりします。</p>
+<p>同じ日の講義（D05、原理編 第5章「認知と UX」）で聞いた話を、ここでは自分の手で再現します。章は、これまでと同じく三つの層の順に並べています。スライドの作例の番号（Ex01〜Ex08）は Unity で作業しやすい順なので、このページでは配布シーンの名前と一緒に書いています。</p>
+
+<nav class="toc">
+<strong>目次</strong>
+<ol start="0">
+<li><a href="#ch0">はじめに：三つの層と、今日の問い</a></li>
+<li><a href="#ch1">準備：取り込み、Timeline の確認、動きを録画する</a></li>
+<li><a href="#ch2">体験の層：見つけられるか、覚えられるか</a></li>
+<li><a href="#ch3">情報の層：順番と、止まる所と、出し入れ</a></li>
+<li><a href="#ch4">見た目の層：暗さと動きの大きさ</a></li>
+<li><a href="#ch5">スクリプトを読む</a></li>
+<li><a href="#ch6">やってみよう：自分のホーム画面に案内を並べる</a></li>
+<li><a href="#ch7">注意の設計の現場</a></li>
+<li><a href="#ch8">提出とフォーム</a></li>
+<li><a href="#ch9">まとめ</a></li>
+</ol>
+</nav>
+
+<h2 id="ch0">0. はじめに：三つの層と、今日の問い</h2>
+<p>講義 D01（原理編 第1章）では、ゲームのデザインが扱う範囲を三つの層に分けました。</p>
+<ul>
+<li><strong>体験の層</strong>：操作したときの手応えや迷いにくさ</li>
+<li><strong>情報の層</strong>：何を、どんな順番で、どれくらいの強さで見せるか</li>
+<li><strong>見た目の層</strong>：色、形、レイアウト、フォント</li>
+</ul>
+<p>前回の H04 では、操作したことにどう応えるかを扱いました。今日はその手前にある、「プレイヤーの注意を、どこへ向けるか」を扱います。問いは 1 つで、「いま見てほしい 1 つを、どうやって見つけてもらうか」です。</p>
+<p>講義 D05 で聞いた言葉のうち、今日の作例に出てくるものを先に並べます。</p>
+<table>
+<tr><th>言葉</th><th>意味</th><th>今日の作例</th></tr>
+<tr><td>注意（attention）</td><td>動くもの・明るいものへ向かいやすい、目の性質</td><td>Ex01・Ex07</td></tr>
+<tr><td>強調は引き算</td><td>全部を目立たせると、何も目立たない。1 つを立てるなら、まわりを静かにする</td><td>Ex02・Ex07</td></tr>
+<tr><td>ワーキングメモリ（working memory）</td><td>頭の中に置いておける量。一度に覚えられるのは数個で、使う場面の直前に教えるほうが残る</td><td>Ex03・Ex04・Ex05</td></tr>
+<tr><td>段階的開示（progressive disclosure）</td><td>状況が必要とする情報だけを出す</td><td>Ex06</td></tr>
+</table>
+<p class="note">配布シーンの Ex 番号は、Unity で作業しやすい順に付けています。今日はたまたま、層の順と Ex 番号の順がそろっています（準備に Ex01、体験の層に Ex02・Ex03、情報の層に Ex04〜Ex06、見た目の層に Ex07、最後に Ex08）。</p>
+
+<h2 id="ch1">1. 準備：取り込み、Timeline の確認、動きを録画する</h2>
+<p>層の話に入る前に、配布物を取り込み、Timeline が使えることを確かめます。そのあと、後の作例で使う「動き」を、スクリプトを書かずに録画で作ります。</p>
+
+<h3>配布物を取り込み、Timeline ウィンドウを開く</h3>
+<p>配布の unitypackage を、H01 で作った DesignPrinciples2026 プロジェクト（Universal 3D のテンプレート）に取り込みます。H04 と同じ手順です。</p>
+<p class="label">手順</p>
+<ol>
+<li>Classroom の課題から <code>H05_GuideAttention.unitypackage</code> をダウンロードします</li>
+<li>Unity で DesignPrinciples2026 プロジェクトを開きます</li>
+<li>メニューバーの <strong>Assets → Import Package → Custom Package...</strong> をクリックします</li>
+<li>開いたウィンドウで、ダウンロードした <code>H05_GuideAttention.unitypackage</code> を選んで開きます</li>
+<li>取り込む中身の一覧が出たら、すべてにチェックが入っていることを確かめ、右下の <strong>Import</strong> をクリックします</li>
+<li>メニューバーの <strong>Window → Sequencing → Timeline</strong> をクリックします</li>
+</ol>
+<figure>
+<img style="max-width:380px;display:block;margin:0 auto" src="images/ed00_import_dialog.png" alt="Import Unity Package のウィンドウ。H05_GuideAttention の下に Animations（Hud、HudHidden、HudShown、PulseDone など）、H05Controls.inputactions、Scenes の 11 シーン、Scripts の 8 本、Timelines の 5 つがチェック付きで並び、各行の右に緑の New。右下に Cancel と Import" loading="lazy">
+<figcaption>取り込む中身の一覧。すべてにチェックが入っています。New は、プロジェクトに新しく入るファイルの印です</figcaption>
+</figure>
+<figure>
+<img src="images/ed00_project_crop.png" alt="Project ウィンドウ。左のツリーで Assets/Lessons/H05_GuideAttention の Scenes が選ばれ、右に Ex01_Done、Ex01_RecordClip、Ex02_OneHighlight など、Ex 番号順にシーンが並ぶ" loading="lazy">
+<figcaption>取り込んだ後の Project ウィンドウ。<code>Assets/Lessons/H05_GuideAttention/</code> に入り、Scenes に 11 のシーンがあります</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>Project ウィンドウの <code>Assets/Lessons/H05_GuideAttention/Scenes</code> に Ex01_RecordClip から Ex08_Start までの 11 のシーンがあり、Timeline ウィンドウが開くことを確認します。開けたら閉じてかまいません。</p>
+<p class="note">Window の中に Sequencing が無いときだけ、Timeline のパッケージが入っていません。<strong>Window → Package Management → Package Manager</strong> を開き、左の <strong>Unity Registry</strong> をクリックし、一覧から <strong>Timeline</strong> を選んで <strong>Install</strong> をクリックします。Universal 3D のテンプレートには最初から入っているので、ほとんどの人は何もしなくて済みます。</p>
+<p class="note">シーンを開いて文字が出ないときは、TextMeshPro の部品が足りていません。TMP Importer のウィンドウが出たら <strong>Import TMP Essentials</strong> をクリックします（H04 で済ませていれば不要です）。</p>
+
+<h3>録画で Clip を作り、START を拡縮させる</h3>
+<p class="path">Assets/Lessons/H05_GuideAttention/Scenes/Ex01_RecordClip.unity ／ Canvas / StartButton</p>
+<p>START ボタンが、1 秒に 1 回、少しだけ大きくなって元に戻るようにします。スクリプトは書かず、Animation ウィンドウの録画で動きを作ります。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>アニメーションクリップ（Animation Clip）：時間に沿って値が変わる記録です。ここでは Scale が 1 → 1.1 → 1 と変わる記録を作ります</li>
+<li>アニメーターコントローラー（Animator Controller）：どの Clip をいつ流すかを決める表です</li>
+<li>アニメーター（Animator）：動かしたい物に付く部品で、Controller を使って Clip を流します</li>
+<li>Animation ウィンドウ：Clip を録画で作る窓です。Create を押すと、上の 3 つが自動でそろいます</li>
+<li>ScaleReadout.cs：画面の「Scale x…（max …）」を表示するスクリプトです。今日は、max の数字で動きが付いたことを確かめるために使います</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Assets/Lessons/H05_GuideAttention/Scenes/Ex01_RecordClip</code> をダブルクリックして開きます</li>
+<li>Play ボタンを押して、上の表示が「Scale x1.00 (max 1.00)」のまま動かないことを見て、もう一度押して止めます</li>
+<li>Hierarchy で <code>Canvas</code> の左の三角をクリックして開き、<code>StartButton</code> をクリックします</li>
+<li>メニューバーの <strong>Window → Animation → Animation</strong> をクリックします</li>
+<li>Animation ウィンドウの中央にある <strong>Create</strong> ボタンをクリックします</li>
+<li>保存先を <code>Assets/Lessons/H05_GuideAttention/Animations</code> にして、名前に <code>MyPulse</code> と入力し、<strong>Save</strong> をクリックします。Animations フォルダに MyPulse（Clip）と StartButton（Animator Controller）ができ、StartButton の Inspector に Animator が付きます</li>
+<li>Animation ウィンドウ左上の赤い丸（録画ボタン）をクリックします</li>
+<li>ウィンドウ上の目盛りの <code>0:30</code> をクリックします</li>
+<li>Inspector の Rect Transform で、Scale の X に <code>1.1</code> を入力して <kbd>Enter</kbd> を押し、Y にも <code>1.1</code> を入力して <kbd>Enter</kbd> を押します</li>
+<li>目盛りの <code>1:00</code> をクリックします</li>
+<li>Inspector の Scale の X と Y を <code>1</code> に戻します</li>
+<li>赤い丸をもう一度クリックして、録画を止めます</li>
+<li>Play ボタン（<kbd>Cmd</kbd> + <kbd>P</kbd>、Windows は <kbd>Ctrl</kbd> + <kbd>P</kbd>）を押し、START が拡大・縮小するのを見てから、もう一度押して止めます</li>
+</ol>
+<figure>
+<img src="images/ed01_animation_create_crop.png" alt="Animation ウィンドウの中央。To begin animating StartButton, create an Animator and an Animation Clip. という文と、その下の Create ボタン" loading="lazy">
+<figcaption>StartButton を選んで Animation ウィンドウを開くと、中央に Create ボタンが出ます</figcaption>
+</figure>
+<figure>
+<img src="images/ed01_animation_rec_crop.png" alt="Animation ウィンドウ。クリップ名 MyPulse、左に StartButton : Scale の行。右の時間の目盛りの 0:00、0:30、1:00 の位置に、キーの菱形が 3 つ並ぶ" loading="lazy">
+<figcaption>MyPulse に、Scale のキーが 0:00・0:30・1:00 の 3 つ並びました。0:00 のキーは自動で入ります</figcaption>
+</figure>
+<figure>
+<img src="images/ed01_rec_inspector_crop.png" alt="録画中の StartButton の Inspector。Rect Transform の Scale の X と Y が 1.1 で、欄が赤い地になっている。Width 360、Height 120" loading="lazy">
+<figcaption>録画中は、変えた欄が赤い地になります。0:30 の位置で Scale の X と Y を 1.1 にしたところです</figcaption>
+</figure>
+<figure>
+<video controls muted loop playsinline preload="metadata" src="videos/op01_record.mp4" title="Animation ウィンドウで録画し、0:30 に Scale の値を入れる操作"></video>
+<figcaption>録画中に時刻（0:30）を選び、Scale の値を入れる操作です（動画は無音です）</figcaption>
+</figure>
+<figure>
+<img src="images/ed01_project_clip_crop.png" alt="Project ウィンドウの Animations フォルダ。Hud、HudHidden、HudShown、MyPulse（選択中）、PulseDone の Clip と Controller、StartButton の Controller が並ぶ" loading="lazy">
+<figcaption>Create で自動的にできるアセット。MyPulse が Clip、StartButton が Animator Controller です（ほかは最初から入っているアセットです）</figcaption>
+</figure>
+<figure>
+<img src="images/ed01_animator_inspector_crop.png" alt="StartButton の Inspector の Animator コンポーネント。Controller に StartButton が入り、Update Mode が Normal、Culling Mode が Always Animate" loading="lazy">
+<figcaption>StartButton に Animator が付き、Controller に StartButton（Animator Controller）が入ります</figcaption>
+</figure>
+<div class="pair">
+<figure>
+<img src="images/ex01_game_idle.png" alt="Ex01_RecordClip の Game ビュー。中央に青い START ボタン、その下に黄色い文字で Scale x1.00 (max 1.00)、いちばん下に Window &gt; Animation &gt; Animation" loading="lazy">
+<figcaption>変更前。Scale は x1.00、max も 1.00 のままです</figcaption>
+</figure>
+<figure>
+<img src="images/ex01_game_done.png" alt="Ex01_Done の Game ビュー。START ボタンが少し大きく、下の文字は Scale x1.10 (max 1.10)" loading="lazy">
+<figcaption>変更後（Ex01_Done）。拡大の頂点で Scale x1.10、max も 1.10 になります</figcaption>
+</figure>
+</div>
+<figure>
+<video controls muted loop playsinline preload="metadata" src="videos/ex01_pulse.mp4" title="START が 1 秒周期で少しだけ拡大し、元に戻る"></video>
+<figcaption>START が 1 秒周期で拡縮します（動画は無音です）</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>Project に MyPulse と StartButton（Animator Controller）ができ、StartButton に Animator が付きます。Play すると START が 1 秒周期で拡縮し、上の表示が「Scale x1.00 (max 1.00)」から「max 1.10」に変わることを確認します。うまくいかないときは、<code>Ex01_Done</code> を開いて、MyPulse と PulseDone を見比べます。</p>
+<table>
+<tr><th>時刻</th><th>Scale</th><th>START の幅（元は 360 px）</th></tr>
+<tr><td>0:00（0 秒）</td><td>1（自動で入る）</td><td>360 px</td></tr>
+<tr><td>0:30（0.5 秒）</td><td>1.1</td><td>396 px</td></tr>
+<tr><td>1:00（1 秒）</td><td>1</td><td>360 px</td></tr>
+</table>
+<p class="note">0:00 の 1 が自動で入らないときは、目盛りの 0:00 をクリックし、Inspector の Scale を右クリックして <strong>Add Key</strong> を選びます。</p>
+<p class="note">録画は、<strong>Play を止めてから</strong>行います。録画を止め忘れると、Inspector で動かした位置まで記録されてしまいます。赤い丸をもう一度押して、目盛りの赤が消えたことを確かめてから次へ進みます。</p>
+
+<h4>0:30 は「0 秒 30 フレーム」</h4>
+<p>Animation ウィンドウの目盛りは、「秒:フレーム」の形で書かれています。この Clip は 1 秒が 60 フレームなので、0:30 は 0.5 秒の位置、1:00 は 1 秒の位置です。1 → 1.1 → 1 の往復が 1 秒で終わるので、START は 1 秒に 1 回、拡縮します。</p>
+<p>この動きは、あとの Ex07 でスクリプトに置き換えて、大きさと速さを数字で変えます。動くものへ目が向かう性質は、同じことを録画で作るか、スクリプトで作るかの違いだけです。</p>
+
+<h2 id="ch2">2. 体験の層：見つけられるか、覚えられるか</h2>
+<p>ホーム画面のバッジが全部点滅していて、どれを押せばよいか分からない。チュートリアルで操作の説明が 6 つ一度に出て、どれも覚えられない。プレイヤーが困る場面は、この 2 つから始まります。この章では、困り具合を「探す時間」と「間違えた回数」という数字にして、見せ方を変えたときに数字がどう動くかを比べます。</p>
+
+<h3>全部が点滅する画面と、1 つだけ点滅する画面を比べる</h3>
+<p class="path">Assets/Lessons/H05_GuideAttention/Scenes/Ex02_OneHighlight.unity ／ SearchGame</p>
+<p>前の作例では、動くと目が向かうことを、START の拡縮で作りました。今度は、動くものが 9 個あったらどうなるかを測ります。上に出た名前（Find）のアイコンを探して押すゲームで、点滅するアイコンを 9 個から 1 個に変えます。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>SearchGame.cs：上に出た名前のアイコンを探して押すゲームです。押すまでの秒数を測って、平均（Avg）を出します</li>
+<li>Blink All：オンのときは 9 個すべてが 0.5 秒周期で点滅し、オフのときは探すアイコン 1 個だけが点滅します</li>
+<li>Avg：自分が見つけるまでにかかった秒数の平均です。1 回目は練習なので入りません</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Scenes/Ex02_OneHighlight</code> をダブルクリックして開きます</li>
+<li>Play ボタンを押し、Game ビューを 1 回クリックします</li>
+<li>画面の上に出た「Find: …」と同じ名前のアイコンを押します。これを 6 回くり返します（1 回目は練習です）</li>
+<li>上の表示の Avg の数字（例：<code>Avg 3.12 s</code>）を書き留めます</li>
+<li>Play ボタンを押して止めます</li>
+<li>Hierarchy で <code>SearchGame</code> をクリックします</li>
+<li>Inspector の <strong>Blink All</strong> のチェックを外します</li>
+<li>Play ボタンを押し、Game ビューを 1 回クリックして、同じように 6 回押します</li>
+<li>Avg の数字を書き留め、止めてから、さっきの Avg と見比べます</li>
+</ol>
+<figure>
+<img src="images/ed02_inspector_crop.png" alt="SearchGame の Inspector。Search Game (Script) の Blink All のチェック（オン）、Blink Period 0.5、Icons 9、Names 9、Find Label、Score、Mode Label、Normal Color（青）、Lit Color（橙）" loading="lazy">
+<figcaption>SearchGame の Inspector。Blink All のチェックを外します（Blink Period 0.5 は点滅 1 回の秒数です）</figcaption>
+</figure>
+<div class="pair">
+<figure>
+<img src="images/ex02_game_all.png" alt="Ex02 の Game ビュー。9 個のアイコン（SHOP、EVENT、NEWS、QUEST、MAIL、RANK、GIFT、GACHA、LOGIN）がすべて明るく光り、上に Blink All: ON (9 icons) と Find: RANK" loading="lazy">
+<figcaption>Blink All がオン。9 個がいっせいに明るく光ります（上の Find: RANK を探します。名前の並びは毎回変わります）</figcaption>
+</figure>
+<figure>
+<img src="images/ex02_game_one.png" alt="Ex02 の Game ビュー。RANK のアイコンだけが明るく光り、残りの 8 個は青いまま。上に Blink All: OFF (1 icon)、下に Last 1.02 s Avg 1.02 s (3) Miss: 0" loading="lazy">
+<figcaption>Blink All がオフ。探すアイコン 1 個だけが光り、下に Avg が出ます（撮影用の画面の値で、Avg は例です。自分の画面では違う値になります）</figcaption>
+</figure>
+</div>
+<figure>
+<video controls muted loop playsinline preload="metadata" src="videos/ex02_search.mp4" title="Blink All がオンのとき 9 個すべてが点滅し、オフにすると探すアイコン 1 個だけが点滅する"></video>
+<figcaption>オンで 3 回、オフで 3 回、アイコンを押している様子です（動画は無音です）</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>6 回押した後の Avg が、オフのほうが小さくなることを確認します。点滅するアイコンは 9 個から 1 個に変わります。Avg が下がらなかった人は、その数字をそのまま書き留めておきます。</p>
+<table>
+<tr><th>Blink All</th><th>点滅するアイコン</th><th>Avg（自分の値を書く）</th></tr>
+<tr><td>オン</td><td>9 個</td><td>（例：3.12 s）</td></tr>
+<tr><td>オフ</td><td>1 個</td><td>（例：1.48 s）</td></tr>
+</table>
+<p class="note">表の 3.12 s と 1.48 s は書き方の例で、自分の画面の値ではありません。Avg は人によって、運によっても変わります。下がらなかったときも、出た数字をそのまま書き、なぜそうなったかをフォームで考えます。</p>
+
+<h4>強調は引き算</h4>
+<p>9 個が同じように点滅していると、目はどれにも向かいにくくなり、名前を 1 つずつ読んで探すことになります。1 個だけが点滅していれば、探す名前を読まなくても、動くものに目が向かいます。強調は、足すほど効くのではなく、まわりを静かにするほど効きます。</p>
+<p>ソーシャルゲームのホーム画面で、お知らせもイベントもガチャも同時に光っているのは、全部を見てほしい結果として、どれも見られない状態です。1 つを立てたいなら、残りは動かさないことが、いちばん安い方法です。</p>
+
+<h3>6 つを一度に教える画面と、1 つずつ教える画面を比べる</h3>
+<p class="path">Assets/Lessons/H05_GuideAttention/Scenes/Ex03_JustInTime.unity ／ Player / Controls Quiz</p>
+<p>前の作例では、目の探し方を比べました。今度は、頭の覚え方です。6 つの操作とキーの組を、6 つ一度に見せる場合と、1 問ごとに 1 つだけ見せる場合で、押し間違い（Miss）がどう変わるかを比べます。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>ControlsQuiz.cs：6 つの操作（JUMP・ATTACK・GUARD・HEAL・DASH・MAP）に対応するキーを覚えて、聞かれたキーを押すクイズです。押し間違いを数えます</li>
+<li>Player Input と H05Controls：6 つのキーを、操作の名前（アクション）に結び付けています。H04 で見た仕組みと同じです</li>
+<li>Teach All：オンのときは、START の後に 6 つを 6 秒間まとめて見せます。オフのときは、1 問ごとにその 1 つだけを 1.5 秒見せてから聞きます</li>
+<li>Miss：押し間違えた数です。「Miss: 2 / 6」のように、6 問のうちの数で出ます</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Scenes/Ex03_JustInTime</code> をダブルクリックして開きます</li>
+<li>Play ボタンを押します</li>
+<li>Game ビューの <strong>START</strong> ボタンをクリックします（キーが届く状態にもなります）</li>
+<li>出てきた 6 行（操作 = キー）を、6 秒の間に覚えます</li>
+<li>「JUMP !」のように出た操作のキーを、キーボードで 1 回押します。これを 6 問くり返します（間違えても次の問題へ進みます）</li>
+<li>上の表示の Miss の数字（例：<code>Miss: 2 / 6</code>）を書き留め、Play ボタンを押して止めます</li>
+<li>Hierarchy で <code>Player</code> をクリックします</li>
+<li>Inspector の Controls Quiz の <strong>Teach All</strong> のチェックを外します</li>
+<li>Play ボタンを押し、START をクリックして、同じように 6 問に答えます</li>
+<li>Miss の数字を書き留め、止めてから、さっきの Miss と見比べます</li>
+</ol>
+<figure>
+<img src="images/ed03_inspector_crop.png" alt="Player の Inspector の Controls Quiz (Script)。Teach All のチェック（オン）、Read Time 6、Hint Time 1.5、Teach Label、Ask Label、Score、Mode Label" loading="lazy">
+<figcaption>Player の Controls Quiz。Teach All のチェックを外します（Read Time 6 は 6 つを見せる秒数、Hint Time 1.5 は 1 問ごとに見せる秒数です）</figcaption>
+</figure>
+<figure>
+<img src="images/ed03_playerinput_crop.png" alt="Player の Inspector の Player Input。Actions が H05Controls、Default Map が Player、Behavior が Send Messages。その下に Will SendMessage() to GameObject: の一覧（OnJump、OnAttack、OnGuard、OnHeal、OnDash、OnMap など）と、Open Input Settings・Open Input Debugger のボタン" loading="lazy">
+<figcaption>Player Input は H04 と同じ設定です。Actions は H05Controls、Behavior は Send Messages で、6 つの操作が「On + 操作名」の一覧に並びます</figcaption>
+</figure>
+<div class="trio">
+<figure>
+<img src="images/ex03_game_teachall.png" alt="Ex03 の Game ビュー。Teach All: ON (6 at once)。JUMP = F、ATTACK = K、GUARD = D、HEAL = J、DASH = S、MAP = L の 6 行が並び、下に Remember... と Miss: 0 / 6、START ボタン" loading="lazy">
+<figcaption>Teach All がオン。6 つの操作とキーが同時に出ます（6 秒間）</figcaption>
+</figure>
+<figure>
+<img src="images/ex03_game_ask.png" alt="Ex03 の Game ビュー。大きな黄色い文字で HEAL !、下に Miss: 1 / 6 と START ボタン。教える文は消えている" loading="lazy">
+<figcaption>出題。「HEAL !」と聞かれたら、HEAL のキーを押します（Miss は撮影用の値の例です）</figcaption>
+</figure>
+<figure>
+<img src="images/ex03_game_one.png" alt="Ex03 の Game ビュー。Teach All: OFF (1 at a time)。JUMP = F の 1 行だけが出ていて、下に Remember... と Miss: 0 / 6" loading="lazy">
+<figcaption>Teach All がオフ。1 問ごとに 1 行だけ出ます（1.5 秒間）</figcaption>
+</figure>
+</div>
+<figure>
+<video controls muted loop playsinline preload="metadata" src="videos/ex03_quiz.mp4" title="Teach All がオフで、1 問ごとに 1 行だけを見せてからキーを押すクイズ"></video>
+<figcaption>Teach All がオフでの遊び方。1 行を見て、すぐにキーを押します（動画は無音です）</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>6 問が終わった後の Miss が、オフのほうで小さくなることを確認します。オフでは、1 問ごとに 1 行だけが出ます。キーが効かないときは、Game ビューを 1 回クリックしてから押します。</p>
+<table>
+<tr><th>Teach All</th><th>見せ方</th><th>Miss（自分の値を書く）</th></tr>
+<tr><td>オン</td><td>6 つを一度に、6 秒</td><td>（<code>n</code> / 6）</td></tr>
+<tr><td>オフ</td><td>1 問ごとに 1 つを、1.5 秒</td><td>（<code>n</code> / 6）</td></tr>
+</table>
+
+<h4>使う場面の直前に教える</h4>
+<p>人が頭の中に置いておけるものの数は多くありません。コーワン（Cowan、2001）は、一度に保てるのは平均で 4 つ前後だと論じています。ミラー（Miller、1956）の「7±2」は、これより少しゆるい言い回しだとされています。6 つを一度に教えると、後ろのほうは、聞かれる頃には残っていません。</p>
+<p>1 つずつ、その操作を使う直前に教えれば、覚えておく必要がなくなります。多くのゲームのチュートリアルが、操作を一度にまとめて並べず、最初の敵の前で攻撃、扉の前でインタラクトと、場面ごとに分けて教えるのも、同じ理由によると考えられます。次の章では、この「場面ごとに 1 つずつ」を Timeline で作ります。</p>
+
+<h2 id="ch3">3. 情報の層：順番と、止まる所と、出し入れ</h2>
+<p>前の章で、一度に教える量を減らすと数字が良くなることを確かめました。この章では、案内を 1 つずつ出す仕組みを Timeline で作ります。さらに、案内が読まれないまま消えてしまう問題を、Signal で止めて直し、最後に、いま要らない情報（HUD）を隠します。</p>
+
+<h3>3 つの案内を 1 つずつ出す（Activation Track）</h3>
+<p class="path">Assets/Lessons/H05_GuideAttention/Scenes/Ex04_ActivationTrack.unity ／ Guide / Timeline</p>
+<p>前の作例の「1 つずつ」を、ここでは画面の案内で作ります。冒険の画面に、CHEST・KEY・DOOR の 3 つの案内（Guide_1〜3）があります。教えるボタンは、黄色い枠で囲まれます。最初は 3 つが同時に出るので、Timeline で、1 つずつ順に出るように直します。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>タイムライン（Timeline）：時間の順に、物を出したり動かしたりする仕組みです。ウィンドウ上で、時間に沿って帯を並べて作ります</li>
+<li>トラック（Track）：1 つの物を担当する行です。今日は、物を出し入れする <strong>Activation Track</strong> だけを使います</li>
+<li>クリップ（Clip）：トラックの上に置く、出す時間の帯です。Start（始まる秒）と Duration（出ている秒数）を持ちます</li>
+<li>プレイアブルディレクター（Playable Director）：Timeline を再生する部品です。Guide に付いています</li>
+<li>バインド（Bind）：トラックに「どの物を担当するか」を結び付けることです。Ex04 では、配布のシーンで済んでいます</li>
+<li>VisibleCount.cs：いま出ている案内の数（Visible）と、同時に出た最大の数（Max）を表示します</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Scenes/Ex04_ActivationTrack</code> をダブルクリックして開きます</li>
+<li>Play ボタンを押し、3 つの案内が同時に出ること、上の表示が <code>Max: 3</code> になることを見て、もう一度押して止めます</li>
+<li>Hierarchy で <code>Guide</code> をクリックします</li>
+<li>メニューバーの <strong>Window → Sequencing → Timeline</strong> をクリックして、Timeline ウィンドウを開きます</li>
+<li>Timeline ウィンドウの右上にある鍵のアイコンをクリックして、ロックします（ほかを選んでも表示が消えなくなります）</li>
+<li>Timeline の目盛りは、最初は「フレーム」で出ています（0〜360、60 フレームで 1 秒）。秒で見たいときは、ウィンドウ右上の歯車（⚙）をクリックし、並ぶ Frames・Timecode・Seconds のうち <strong>Seconds</strong> を選びます</li>
+<li>Guide_1 のトラックの帯（クリップ）をクリックします</li>
+<li>Inspector の <strong>Clip Timing</strong> の <strong>Duration</strong> の <strong>s</strong> の欄に <code>2</code> を入力し、<kbd>Enter</kbd> を押します（f の欄は 120 に変わります）</li>
+<li>Guide_2 のクリップをクリックし、<strong>Start</strong> の s の欄に <code>2</code>、<strong>Duration</strong> の s の欄に <code>2</code> を入力します</li>
+<li>Guide_3 のクリップをクリックし、<strong>Start</strong> の s の欄に <code>4</code>、<strong>Duration</strong> の s の欄に <code>2</code> を入力します</li>
+<li>Timeline ウィンドウの再生ヘッド（時間の目盛りの上のつまみ）を左右にドラッグして、Game ビューで案内が入れ替わるのを見ます</li>
+<li><kbd>Cmd</kbd> + <kbd>S</kbd>（Windows は <kbd>Ctrl</kbd> + <kbd>S</kbd>）で保存します</li>
+<li>Play ボタンを押し、上の表示が <code>Max: 1</code> になることを確かめ、止めます</li>
+</ol>
+<figure>
+<img src="images/ed04_timeline_before_crop.png" alt="Timeline ウィンドウ（Ex04_Guide (Guide)）。Guide_1、Guide_2、Guide_3 の 3 本のトラックに、どれも 0 から 6.00 秒までの同じ長さのクリップが並ぶ" loading="lazy">
+<figcaption>変更前。3 つのクリップがどれも 0 秒から 6 秒まで、同じ長さで並んでいます</figcaption>
+</figure>
+<figure>
+<img src="images/ed04_timeline_lock_crop.png" alt="Timeline ウィンドウの全幅。右上の端に鍵のアイコンと歯車のアイコンがある" loading="lazy">
+<figcaption>右上の端に、鍵（ロック）と歯車（目盛りの切り替え）があります</figcaption>
+</figure>
+<figure>
+<img src="images/ed04_clip_inspector_crop.png" alt="Guide_2 のクリップを選んだ Inspector。Clip Timing の Start は s が 2、f が 120。End は s が 4、f が 240。Duration は s が 2、f が 120" loading="lazy">
+<figcaption>クリップを選ぶと、Inspector に Clip Timing が出ます。Start・End・Duration に、s（秒）と f（フレーム）の 2 つの欄があります（画像は変更後の Guide_2 です）</figcaption>
+</figure>
+<figure>
+<video controls muted loop playsinline preload="metadata" src="videos/op04_clip_move.mp4" title="Timeline のクリップの端をドラッグして長さを変える操作"></video>
+<figcaption>クリップをドラッグして、長さや位置を変える操作です（動画は無音です）</figcaption>
+</figure>
+<figure>
+<img src="images/ed04_timeline_after_crop.png" alt="Timeline ウィンドウ。Guide_1 が 0〜2 秒、Guide_2 が 2〜4 秒、Guide_3 が 4〜6 秒の階段状に並ぶ" loading="lazy">
+<figcaption>変更後。クリップが階段状に並びます</figcaption>
+</figure>
+<figure>
+<video controls muted loop playsinline preload="metadata" src="videos/op04_scrub.mp4" title="Timeline の再生ヘッドを左右にドラッグする操作"></video>
+<figcaption>再生ヘッドを左右にドラッグしている様子です。Timeline ウィンドウだけを写しています（動画は無音です）</figcaption>
+</figure>
+<figure>
+<img src="images/ed04_director_inspector_crop.png" alt="Guide の Playable Director。Playable が Ex04_Guide (Timeline Asset)、Update Method が Game Time、Play On Awake にチェック、Wrap Mode が None、Initial Time が 0、Bindings" loading="lazy">
+<figcaption>Guide の Playable Director。Playable に Timeline のアセット（Ex04_Guide）が入っています</figcaption>
+</figure>
+<div class="pair">
+<figure>
+<img src="images/ex04_game_before.png" alt="Ex04 の Game ビュー。上に Time 1.2 s Visible: 3 Max: 3。「1. Open the CHEST」「2. Take the KEY」「3. Open the DOOR」の 3 つの案内が同時に出て、CHEST・KEY・DOOR の 3 つのボタンがそれぞれ黄色い枠で囲まれている" loading="lazy">
+<figcaption>変更前。3 つの案内が同時に出て、Visible: 3、Max: 3 です。教えるボタンは黄色い枠で囲まれます</figcaption>
+</figure>
+<figure>
+<img src="images/ex04_game_after.png" alt="Ex05_SignalStop の Game ビュー（Ex04 の変更後と同じ Timeline）。上に Time 1.0 s Visible: 1 Max: 1。「1. Open the CHEST」の案内が 1 つだけ出て、CHEST のボタンが黄色い枠で囲まれている" loading="lazy">
+<figcaption>変更後と同じ形（画像は Ex05_SignalStop の 1 秒の画面）。案内は 1 つだけで、Visible: 1、Max: 1 です</figcaption>
+</figure>
+</div>
+<figure>
+<video controls muted loop playsinline preload="metadata" src="videos/ex04_before_after.mp4" title="3 つの案内が同時に出る画面と、1 つずつ順に出る画面"></video>
+<figcaption>前半が変更前（3 つ同時）、後半が変更後（1 つずつ）です（動画は無音です）</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>3 つのクリップが 0〜2 秒、2〜4 秒、4〜6 秒と階段状に並び、Play すると案内が 1 つずつ順に出て、上の表示が <code>Max: 3</code> から <code>Max: 1</code> になることを確認します。</p>
+<table>
+<tr><th>案内</th><th>変更前の Start</th><th>変更前の Duration</th><th>変更後の Start</th><th>変更後の Duration</th></tr>
+<tr><td>Guide_1</td><td>0</td><td>6</td><td>0</td><td>2</td></tr>
+<tr><td>Guide_2</td><td>0</td><td>6</td><td>2</td><td>2</td></tr>
+<tr><td>Guide_3</td><td>0</td><td>6</td><td>4</td><td>2</td></tr>
+<tr><td>同時に出る数（Max）</td><td colspan="2">3</td><td colspan="2">1</td></tr>
+</table>
+<p class="note">Clip Timing の Start・End・Duration には、s と f の 2 つの欄があります。s は秒、f はフレームで、どちらかを変えるともう一方も変わります。このページでは s の欄に入れます。クリップの真ん中をドラッグすると Start が、右端をドラッグすると Duration が変わります。ドラッグでも作れますが、Inspector に数字を入れると、1 コマ単位のずれがなくなります。値を入力したら <kbd>Enter</kbd> で確定します。</p>
+<p class="note">Timeline ウィンドウに何も出ないときは、Hierarchy で <code>Guide</code> を選んでいるか、鍵（ロック）が外れていないかを見ます。</p>
+
+<h4>案内は、時間をずらして 1 つずつ</h4>
+<p>Start を 0・2・4 にずらすと、同時に出る数が 3 から 1 に減ります。Duration を 2 にすると、次の案内が始まる前に前の案内が終わるので、重なりません。前の章で、一度に教えるのはひとつ、が良い数字になることを確かめました。Timeline は、それを時間の上に並べる道具です。</p>
+
+<h3>案内を出した所でゲームを止める（Signal）</h3>
+<p class="path">Assets/Lessons/H05_GuideAttention/Scenes/Ex05_SignalStop.unity ／ Guide / Timeline の Signal Receiver のトラック</p>
+<p>前の作例の Timeline は、案内を 2 秒ずつ出して消します。読むのが遅い人は、読み終える前に消えてしまいます。今度は、Ex04 の変更後と同じ Timeline に、案内が出たところで止まり、正しいボタンを押すと続きが流れる仕組みを足します。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>シグナルエミッター（Signal Emitter）：Timeline の上に置く印です。再生がそこに届くと、決めた名前の合図（Signal）を出します</li>
+<li>シグナルレシーバー（Signal Receiver）：合図を受け取って、決めた処理を呼ぶ部品です。Guide に付いていて、H05Stop の合図を GuideGate の Wait につないであります</li>
+<li>Signal Receiver のトラック：エミッターを置くための Signal Track です。Timeline のいちばん下の行で、見出しは「Guide (Signal Receiver)」と表示されます。配布のシーンでは作成時に「Stops」と名前を付けてあるので、Game ビューの文字（Add Signal Emitters to the Stops track）の「Stops track」は、この行のことです</li>
+<li>GuideGate.cs：Wait() が Timeline を止め、Answer() が正しいボタンのときに続きを流します。読まれないまま消えた案内は Skipped として数えます。中身は 5 章で読みます</li>
+</ul>
+<ol class="flow">
+<li>Timeline の再生</li><li class="arrow">→</li>
+<li>Signal Emitter の印</li><li class="arrow">→</li>
+<li>Signal Receiver</li><li class="arrow">→</li>
+<li><code>GuideGate.Wait</code>（止める）</li><li class="arrow">→</li>
+<li>ボタンを押す</li><li class="arrow">→</li>
+<li><code>GuideGate.Answer</code>（続きを流す）</li>
+</ol>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Scenes/Ex05_SignalStop</code> をダブルクリックして開きます</li>
+<li>Play ボタンを押し、何も押さずに 7 秒待ちます</li>
+<li>上の表示が <code>Done: 0   Skipped: 3</code> になることを確かめ、もう一度押して止めます</li>
+<li>Hierarchy で <code>Guide</code> をクリックします</li>
+<li>Inspector の Signal Receiver に、<code>H05Stop</code> と <code>GuideGate.Wait</code> が登録されていることを見ます</li>
+<li>メニューバーの <strong>Window → Sequencing → Timeline</strong> をクリックし、右上の鍵（ロック）をクリックします</li>
+<li>Signal Receiver のトラック（いちばん下の「Guide (Signal Receiver)」の行）の 1.5 秒あたりを右クリックし、<strong>Add Signal Emitter</strong> を選びます</li>
+<li>置かれた印をクリックします</li>
+<li>Inspector の <strong>Time</strong> の <strong>s</strong> の欄に <code>1.5</code> を入力して <kbd>Enter</kbd> を押し（f の欄は 90 に変わります）、<strong>Emit Signal</strong> の欄から <code>H05Stop</code> を選びます</li>
+<li>同じトラックの 3.5 秒あたりを右クリックし、<strong>Add Signal Emitter</strong> を選んで、同じように Time を <code>3.5</code>、Emit Signal を <code>H05Stop</code> にします</li>
+<li>5.5 秒にも同じように置き、Time を <code>5.5</code>、Emit Signal を <code>H05Stop</code> にします</li>
+<li><kbd>Cmd</kbd> + <kbd>S</kbd>（Windows は <kbd>Ctrl</kbd> + <kbd>S</kbd>）で保存します</li>
+<li>Play ボタンを押し、表示が「Timeline: WAITING for your click」に変わり、案内が出たまま止まるのを見ます</li>
+<li>止まっている案内に合うボタン（案内が「1. Open the CHEST」なら CHEST）をクリックします</li>
+<li>2 つ目、3 つ目も同じように押して、上の表示が <code>Done: 3   Skipped: 0</code> になるのを確かめます</li>
+</ol>
+<figure>
+<img src="images/ed05_timeline_no_emitter_crop.png" alt="Timeline ウィンドウ（Ex05_Guide (Guide)）。Guide_1 が 0〜2 秒、Guide_2 が 2〜4 秒、Guide_3 が 4〜6 秒と階段状に並び、いちばん下の Guide (Signal Receiver) の行には何も置かれていない" loading="lazy">
+<figcaption>変更前。いちばん下の Guide (Signal Receiver) の行に、印は 1 つもありません</figcaption>
+</figure>
+<figure>
+<img src="images/ed05_timeline_with_emitters_crop.png" alt="Timeline ウィンドウ。階段状の 3 つのクリップの下の Guide (Signal Receiver) の行に、1.5、3.5、5.5 秒あたりに印が 3 つ並ぶ" loading="lazy">
+<figcaption>変更後。Signal Receiver のトラックに 3 つの印が、各案内の終わる 0.5 秒前に並びます</figcaption>
+</figure>
+<figure>
+<video controls muted loop playsinline preload="metadata" src="videos/op05_emitters.mp4" title="Signal Receiver のトラックに印を置いていく操作"></video>
+<figcaption>Signal Receiver のトラックに、印を置いていく様子です（動画は無音です）</figcaption>
+</figure>
+<figure>
+<img src="images/ed05_emitter_inspector_crop.png" alt="Signal Emitter の Inspector。見出しが H05Stop、Time は s が 1.5、f が 90、Retroactive と Emit Once は未チェック、Emit Signal が H05Stop" loading="lazy">
+<figcaption>印を選ぶと、Inspector に Time と Emit Signal が出ます。Time の s の欄が 1.5（f は 90 に変わります）、Emit Signal が H05Stop です</figcaption>
+</figure>
+<figure>
+<img src="images/ed05_receiver_inspector_crop.png" alt="Guide の Inspector。Playable Director（Ex05_Guide）、Guide Gate (Script)（Guides が 3、Status、Score）、Signal Receiver (Script)。Signal Receiver の表に、Signal が H05Stop、Reaction が Runtime Only と GuideGate.Wait（対象は Guide）" loading="lazy">
+<figcaption>Guide の Signal Receiver。H05Stop の合図が来たら、Guide の GuideGate.Wait を呼ぶ、と登録されています</figcaption>
+</figure>
+<div class="trio">
+<figure>
+<img src="images/ex05_game_skipped.png" alt="Ex05_SignalStop の Game ビュー。Time 7.0 s Visible: 0 Max: 1。Timeline: PLAYING、Done: 0 Skipped: 3 Wrong: 0。案内は何も出ていない" loading="lazy">
+<figcaption>何も押さず、7 秒待った結果。Done: 0 Skipped: 3 です</figcaption>
+</figure>
+<figure>
+<img src="images/ex05_game_waiting.png" alt="Ex05_Done の Game ビュー。Timeline: WAITING for your click、Done: 0 Skipped: 0 Wrong: 0。「1. Open the CHEST」の案内が出たまま、CHEST が枠で囲まれている" loading="lazy">
+<figcaption>印の位置で WAITING。案内が出たまま止まり、押すのを待ちます</figcaption>
+</figure>
+<figure>
+<img src="images/ex05_game_done.png" alt="Ex05_Done の Game ビュー。Time 7.1 s Visible: 0 Max: 1。Timeline: PLAYING、Done: 3 Skipped: 0 Wrong: 0。案内は出ていない" loading="lazy">
+<figcaption>3 つとも押した結果。Done: 3 Skipped: 0 です</figcaption>
+</figure>
+</div>
+<figure>
+<video controls muted loop playsinline preload="metadata" src="videos/ex05_signal.mp4" title="案内が出て止まり、正しいボタンを押すと続きが流れて、次の案内で止まる"></video>
+<figcaption>案内が出て WAITING で止まり、押すと続きが流れます（動画は無音です）</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>何も押さないと <code>Done: 0   Skipped: 3</code> になります。Signal Emitter を 3 つ置いて Play すると、案内が出たところで WAITING になり、正しいボタンを押すと続きが流れて、最後に <code>Done: 3   Skipped: 0</code> になります。違うボタンを押すと、Wrong が増えます。</p>
+<p class="note">止まらないときは、印の Emit Signal が <code>H05Stop</code> になっているか、Time が合っているかを見ます。見比べたいときは <code>Ex05_Done</code> を開きます。</p>
+<p class="note">提出するスクリーンショット ① を撮るのは、<strong>3 つの印が Signal Receiver のトラックに並んだまま Play して、表示が <code>Done: 3   Skipped: 0</code> になった後</strong>です。Timeline ウィンドウと Game ビューが 1 枚に写るように、エディタ全体を撮ります。Title が「H05  Ex05  Signal Stop」であることも確かめます（Ex05_Done の画面は 0 点です）。</p>
+
+<h4>1.5 秒に置く理由と、置く時刻を変えるとどうなるか</h4>
+<p>Guide_1 は 0 秒から 2 秒まで出ています。印を 1.5 秒に置いたのは、案内が終わる 0.5 秒前です。ここで止めると、案内は出たまま止まり、正しいボタンを押した後は、残りの 0.5 秒が過ぎると次の案内が出ます。</p>
+<p>止まっている間は、押すまで案内が出続けるので、読む時間は印の位置では変わりません。変わるのは、押した後です。早く止めるほど、正しいボタンを押した後に案内が残る時間が長く、次の案内までの待ちが長くなります。</p>
+<table>
+<tr><th>1 つ目の印の Time</th><th>止まる位置</th><th>押した後、次の案内までの待ち</th></tr>
+<tr><td>0.2 秒</td><td>案内が出てすぐ</td><td>1.8 秒</td></tr>
+<tr><td>1 秒</td><td>案内の真ん中</td><td>1 秒</td></tr>
+<tr><td>1.5 秒（配布の値）</td><td>終わる 0.5 秒前</td><td>0.5 秒</td></tr>
+<tr><td>1.9 秒</td><td>終わる 0.1 秒前</td><td>0.1 秒</td></tr>
+</table>
+<p>待ちは、案内の終わる 2 秒から印の Time を引いた値です。0.2 秒に置くと、押した後に案内が 1.8 秒も出たまま残り、次の案内がなかなか出ません。ゲームのテンポが悪くなります。逆に終わりぎわの 1.9 秒に置くと、PC が遅くて 1 フレームが長引いたとき、止まる前に次の案内へ進んでしまうことがあります。1.5 秒は、その両方を避ける値です。</p>
+<p class="note">Time を 0.2 にして試すときは、1 つ目の印の Time だけを変えて、押した後に案内がどれだけ残るかを見ます。変えたら、元の 1.5 に戻してから提出用のスクリーンショットを撮ります。</p>
+
+<h3>いま要らない HUD を隠す</h3>
+<p class="path">Assets/Lessons/H05_GuideAttention/Scenes/Ex06_ProgressiveHud.unity ／ HudMode / Hud</p>
+<p>前の作例では、案内を「いつ出すか」を決めました。今度は、案内ではなく、画面に出しっぱなしの情報（HUD）を、状況に合わせて出し入れします。探索中は体力・弾数・ミニマップ・スキルが全部出ていますが、戦っていないときに弾数は要りません。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>HUD：体力・弾数・ミニマップ・スキルのように、プレイ中に出しっぱなしにする情報の画面です</li>
+<li>HudMode.cs：EXPLORE（探索）と BATTLE（戦闘）を切り替え、Hide In Explore がオンのときは、探索中の HUD を隠します</li>
+<li>Hide In Explore：探索中に HUD を隠すかどうかのチェックです。最初はオフです</li>
+<li>Animator：Hud に付いています。Visible という値で、Shown（出ている）と Hidden（隠れている）の状態を行き来します</li>
+<li>HUD Alpha：HUD の透明度の数字です。1 が見える、0 が見えない状態です</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Scenes/Ex06_ProgressiveHud</code> をダブルクリックして開きます</li>
+<li>Play ボタンを押し、画面の <strong>BATTLE</strong> ボタンを何度かクリックして、探索中も HUD が出たままなのを見ます</li>
+<li>上の表示が、EXPLORE のとき <code>HUD Alpha 1.00</code> であることを見て、もう一度 Play を押して止めます</li>
+<li>Hierarchy で <code>HudMode</code> をクリックします</li>
+<li>Inspector の <strong>Hide In Explore</strong> のチェックを入れます</li>
+<li>Play ボタンを押し、EXPLORE のとき HUD が消えて <code>HUD Alpha 0.00</code> になることを見ます</li>
+<li>BATTLE ボタンをクリックし、HUD が現れて <code>HUD Alpha 1.00</code> になることを見ます（ボタンは BACK TO EXPLORE に変わります。もう一度押すと EXPLORE に戻ります）</li>
+<li>Play ボタンを押して止めます</li>
+<li>メニューバーの <strong>Window → Animation → Animator</strong> をクリックします</li>
+<li>Hierarchy で <code>Hud</code> をクリックし、Play ボタンを押して BATTLE を押し、Shown と Hidden の枠の間を行き来する様子を見ます</li>
+</ol>
+<figure>
+<img src="images/ed06_hudmode_inspector_crop.png" alt="Hud Mode (Script)。Hide In Explore のチェック（オフ）、Hud Animator、Hud、Mode Label、Readout、Button Label" loading="lazy">
+<figcaption>HudMode の Inspector。Hide In Explore のチェックを入れます（最初はオフです）</figcaption>
+</figure>
+<figure>
+<img src="images/ed06_animator_window_crop.png" alt="Animator ウィンドウの Base Layer。Entry から橙色の Shown へ矢印が伸び、Shown と Hidden の間に上向きと下向きの矢印がある。Any State と Exit も並ぶ" loading="lazy">
+<figcaption>Animator ウィンドウ。Entry から始まって、Shown と Hidden の状態の間を行き来します</figcaption>
+</figure>
+<div class="trio">
+<figure>
+<img src="images/ex06_game_explore_before.png" alt="Ex06 の Game ビュー。EXPLORE、HUD Alpha 1.00。緑の枠の中に HP 120 の体力バー、右上に MAP、下に Q・W・E のスキルと AMMO 24 / 90。下に BATTLE ボタン" loading="lazy">
+<figcaption>Hide In Explore がオフ。EXPLORE でも HUD が出ています（HUD Alpha 1.00）</figcaption>
+</figure>
+<figure>
+<img src="images/ex06_game_explore_after.png" alt="Ex06 の Game ビュー。EXPLORE、HUD Alpha 0.00。緑の枠の中は空で、下に BATTLE ボタン" loading="lazy">
+<figcaption>オンにした EXPLORE。HUD が消えます（HUD Alpha 0.00）</figcaption>
+</figure>
+<figure>
+<img src="images/ex06_game_battle.png" alt="Ex06 の Game ビュー。BATTLE、HUD Alpha 1.00。体力バー、MAP、Q・W・E、AMMO 24 / 90 が出ていて、下のボタンは BACK TO EXPLORE" loading="lazy">
+<figcaption>オンのまま BATTLE にすると、HUD が戻ります（HUD Alpha 1.00）。ボタンは BACK TO EXPLORE に変わります</figcaption>
+</figure>
+</div>
+<figure>
+<video controls muted loop playsinline preload="metadata" src="videos/ex06_hud.mp4" title="EXPLORE では HUD が消えていて、BATTLE ボタンを押すと HUD が現れる"></video>
+<figcaption>BATTLE を押すと HUD が現れ、EXPLORE に戻すと消えます（動画は無音です）</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>Hide In Explore をオンにすると、EXPLORE の HUD Alpha が <code>1.00</code> から <code>0.00</code> になり、BATTLE のときは <code>1.00</code> のままです。Animator ウィンドウで、Shown と Hidden の状態が BATTLE の切り替えに合わせて動くことも確認します。</p>
+<table>
+<tr><th>Hide In Explore</th><th>EXPLORE の HUD Alpha</th><th>BATTLE の HUD Alpha</th></tr>
+<tr><td>オフ</td><td>1.00</td><td>1.00</td></tr>
+<tr><td>オン</td><td>0.00</td><td>1.00</td></tr>
+</table>
+
+<h4>段階的開示：出すより、引っ込める</h4>
+<p>HUD の数字は、見る必要がないときも画面にあって、目の注意と頭の置き場所を取ります。探索中に弾数が見えていても、プレイヤーにできることはありません。いま必要な情報だけを出し、要らなくなったら引っ込めるのが、段階的開示です。</p>
+<p>この作例では、出し入れの切り替えを、スクリプトではなく Animator に任せています。HudMode は「見せるか」を Visible に入れるだけで、実際に HUD を出し入れする動きは、Hud.controller の中にあります。1 章で作った Animation Clip と同じ仕組みが、ここでも働いています。</p>
+
+<h2 id="ch4">4. 見た目の層：暗さと動きの大きさ</h2>
+<p>案内が出る順番と止まる所を決めたら、最後に、その案内がどれくらい強く見えるかを決めます。強すぎるとうるさく、弱すぎると見逃されます。この章では、まわりを暗くする量（Dim）と、動きの大きさ（Max Scale）と速さ（Period）の 3 つの数字を変えて、目立ち方を比べます。</p>
+
+<h3>QUEST だけを立てる</h3>
+<p class="path">Assets/Lessons/H05_GuideAttention/Scenes/Ex07_HighlightLook.unity ／ Spotlight、Canvas / Icon_4（QUEST）</p>
+<p>Ex02 と同じ、9 個のアイコンの格子です。今度は点滅ではなく、中央の QUEST だけが拡縮します。まず、大きく速い動きを見て、次に、まわりを暗くして、動きを小さくゆっくりにします。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>PulseScale.cs：物の大きさを、1 → Max Scale → 1 と、Period 秒で 1 回、くり返し変えるスクリプトです。Ex01 の録画で作った動きを、数字で調整できる形にしたものです</li>
+<li>Spotlight.cs：QUEST のまわりを 4 枚の黒い板で覆って、暗くします</li>
+<li>Dim：まわりを覆う黒の濃さです。0 は何もしない、1 は真っ黒です</li>
+<li>Max Scale：いちばん大きくなったときの倍率です</li>
+<li>Period：拡縮 1 回にかかる秒数です</li>
+</ul>
+<p class="label">手順</p>
+<ol>
+<li>Project ウィンドウで <code>Scenes/Ex07_HighlightLook</code> をダブルクリックして開きます</li>
+<li>Play ボタンを押し、中央の QUEST が大きく速く拡縮するのを見ます</li>
+<li>上の表示（<code>Dim 0.00   Scale x1.30   Period 0.60 s</code>）を書き留め、もう一度押して止めます</li>
+<li>Hierarchy で <code>Spotlight</code> をクリックします</li>
+<li>Inspector の <strong>Dim</strong> に <code>0.6</code> を入力し、<kbd>Enter</kbd> を押します</li>
+<li>Play ボタンを押し、まわりが暗くなって QUEST だけが明るく残ることを見て、止めます</li>
+<li>Hierarchy で <code>Canvas</code> の左の三角をクリックして開き、<code>Icon_4</code> をクリックします（QUEST のアイコンです）</li>
+<li>Inspector の Pulse Scale の <strong>Max Scale</strong> に <code>1.05</code>、<strong>Period</strong> に <code>2</code> を入力して、それぞれ <kbd>Enter</kbd> を押します</li>
+<li>Play ボタンを押し、動きが小さくゆっくりになったのを見て、表示（<code>Dim 0.60   Scale x1.05   Period 2.00 s</code>）を書き留めます。止めます</li>
+<li>Dim・Max Scale・Period を、1.05 / 2 / 0.6 以外の、自分で決めた組にして Play し、見え方を書き留めます</li>
+</ol>
+<figure>
+<img src="images/ed07_spotlight_inspector_crop.png" alt="Spotlight (Script)。Dim のスライダーは 0、Padding は 30、Target は Icon_4 (Rect Transform)、Top・Bottom・Left・Right の 4 枚の板、Pulse、Readout" loading="lazy">
+<figcaption>Spotlight の Inspector。Dim（スライダー。最初は 0）を 0.6 にします。Padding は 30 です</figcaption>
+</figure>
+<figure>
+<img src="images/ed07_pulse_inspector_crop.png" alt="Icon_4 の Inspector。ほかのコンポーネントは閉じていて、Pulse Scale (Script) の Max Scale が 1.3、Period が 0.6" loading="lazy">
+<figcaption>Icon_4 の Pulse Scale。Max Scale と Period を変えます（画像は変更前の 1.3 と 0.6 です）</figcaption>
+</figure>
+<div class="trio">
+<figure>
+<img src="images/ex07_game_before.png" alt="Ex07 の Game ビュー。9 個のアイコンが明るく並び、中央の QUEST だけが大きく膨らんでいる。上に Dim 0.00 Scale x1.30 Period 0.60 s" loading="lazy">
+<figcaption>変更前：Dim 0.00、x1.30、0.60 s。まわりは明るいままです</figcaption>
+</figure>
+<figure>
+<img src="images/ex07_game_dim.png" alt="Ex07 の Game ビュー。上に Dim 0.60 Scale x1.30 Period 0.60 s。まわりの 8 個が暗く、中央の QUEST だけが大きく明るい" loading="lazy">
+<figcaption>Dim 0.6（x1.30、0.60 s のまま）。まわりが暗くなり、QUEST が立ちます</figcaption>
+</figure>
+<figure>
+<img src="images/ex07_game_after.png" alt="Ex07 の Game ビュー。上に Dim 0.60 Scale x1.05 Period 2.00 s。まわりは暗く、中央の QUEST はわずかに大きい" loading="lazy">
+<figcaption>Dim 0.6 で x1.05、2.00 s。控えめな動きでも QUEST は目に入ります</figcaption>
+</figure>
+</div>
+<figure>
+<video controls muted loop playsinline preload="metadata" src="videos/ex07_spotlight.mp4" title="QUEST が大きく速く拡縮する状態から、まわりが暗くなり、動きが小さくゆっくりになる"></video>
+<figcaption>Dim と動きの 3 つの状態を順に見せています（動画は無音です）</figcaption>
+</figure>
+<p class="check"><strong>確認：</strong>Dim を 0.6 にするとまわりが暗くなって QUEST だけが残り、Max Scale 1.05・Period 2 にすると、動きが小さくゆっくりになることを確認します。表示の数字（<code>Dim 0.60   Scale x1.05   Period 2.00 s</code>）が、Inspector に入れた値と合っています。</p>
+<table>
+<tr><th>状態</th><th>Dim</th><th>Max Scale</th><th>Period</th><th>QUEST の幅（元は 220 px）</th></tr>
+<tr><td>変更前</td><td>0</td><td>1.3</td><td>0.6 s</td><td>220 → 286 px（66 px 増える）</td></tr>
+<tr><td>変更後</td><td>0.6</td><td>1.05</td><td>2 s</td><td>220 → 231 px（11 px 増える）</td></tr>
+<tr><td>自分で決めた組</td><td colspan="4">（自分の値と、見え方を書く）</td></tr>
+</table>
+
+<h4>大きく速い動きは、目を引くがうるさい</h4>
+<p>Max Scale 1.3・Period 0.6 秒の動きは、目を強く引きます。ただ、ホームのように何度も見る画面では、同じ動きを見続けることになり、やがてうるさく感じます。Max Scale 1.05・Period 2 秒の動きは、小さくゆっくりですが、Dim で QUEST 以外を暗くしてあれば、それでも目に入ります。まわりを静かにするほど、動きは小さくて足ります。</p>
+<p>Dim 0.6 は、まわりに黒を 6 割かぶせるので、もとの明るさの 4 割ほどが残ります。Dim を上げすぎると、画面全体が見えにくくなります。暗さと動きは、どちらか一方を強くするのではなく、組み合わせで決めます。</p>
+<h4>PulseScale の 1 周の中身</h4>
+<p>PulseScale は、時間に合わせて 0 → 1 → 0 と往復する値 t を作り、1 と Max Scale の間を t で動かしています。1 周の途中の値は、次のようになります。</p>
+<table>
+<tr><th>経過</th><th>t</th><th>倍率（Max Scale 1.3）</th><th>倍率（Max Scale 1.05）</th></tr>
+<tr><td>0（1 周の始まり）</td><td>0</td><td>1.00</td><td>1.00</td></tr>
+<tr><td>Period の 4 分の 1</td><td>0.5</td><td>1.15</td><td>1.025</td></tr>
+<tr><td>Period の半分（頂点）</td><td>1</td><td>1.30</td><td>1.05</td></tr>
+<tr><td>Period（1 周）</td><td>0</td><td>1.00</td><td>1.00</td></tr>
+</table>
+<p>頂点に届くのは、Period 0.6 秒なら 0.3 秒後、Period 2 秒なら 1 秒後です。同じ大きさの動きでも、Period が長いほど、頂点までゆっくり向かいます。</p>
+<h4>穴の余白 30 px の理由</h4>
+<p>Spotlight の穴は、QUEST の大きさに、余白（Padding）30 px を足した枠です。QUEST が 1.3 倍に膨らむと、幅は 220 → 286 px で、片側 33 px、高さは 150 → 195 px で、片側 22.5 px はみ出します。余白 30 px は、その分をほぼ覆う値で、膨らんだ QUEST が暗い板の下に隠れません。</p>
+
+<h2 id="ch5">5. スクリプトを読む</h2>
+<p>今日の作例は、Timeline と Animator の設定で作れる所が多く、スクリプトは短くて済んでいます。8 本のうち、授業で全文を読むのは GuideGate.cs（案内を止めて続ける仕組み）と PulseScale.cs（拡縮の仕組み）の 2 本です。ほかの 6 本は、折りたたんでありますので、授業のあとで、コメントを手がかりに読んでみましょう。</p>
+<p class="note">どのスクリプトも配布物に入っているので、書き写す必要はありません。ここに載せているのは、配布物と同じ内容です。</p>
+
+<h3>GuideGate.cs：案内を止めて続ける</h3>
+<p class="path">Assets/Lessons/H05_GuideAttention/Scripts/GuideGate.cs ／ Ex05・Ex08</p>
+<p>Signal Receiver から呼ばれて Timeline を止め、ボタンから呼ばれて続きを流します。いま出ている案内の番号を探す所と、答えられずに消えた案内を数える所が、仕組みの中心です。</p>
+<pre><code>using TMPro;
+using UnityEngine;
+using UnityEngine.Playables;
+
+/// 段階的な案内の「止める・続ける」。
+/// - Wait()    : Signal Receiver から呼ばれる。いまの案内がまだ終わっていなければ Timeline を止める
+/// - Answer(n) : ボタンから呼ばれる。いまの案内（0 から数える）と合っていれば Timeline を続ける
+[RequireComponent(typeof(PlayableDirector))]
+public class GuideGate : MonoBehaviour
+{
+    public GameObject[] guides;
+    public TMP_Text status;
+    public TMP_Text score;
+
+    PlayableDirector _director;
+    bool[] _shown, _done;
+    bool _waiting;
+    int _doneCount, _skipped, _wrong;
+
+    public bool Waiting =&gt; _waiting;
+
+    void Awake()
+    {
+        _director = GetComponent&lt;PlayableDirector&gt;();
+        _shown = new bool[guides.Length];
+        _done = new bool[guides.Length];
+        Refresh();
+    }
+
+    public void Wait()
+    {
+        int i = Current();
+        if (i &lt; 0 || _done[i])
+            return;
+        _director.Pause();
+        _waiting = true;
+        Refresh();
+    }
+
+    public void Answer(int index)
+    {
+        if (index == Current() &amp;&amp; !_done[index])
+        {
+            _done[index] = true;
+            _doneCount++;
+            if (_waiting)
+            {
+                _waiting = false;
+                _director.Resume();
+            }
+        }
+        else
+            _wrong++;
+        Refresh();
+    }
+
+    void LateUpdate()   // 操作されないまま消えた案内を数える
+    {
+        for (int i = 0; i &lt; guides.Length; i++)
+        {
+            bool active = guides[i].activeSelf;
+            if (_shown[i] &amp;&amp; !active &amp;&amp; !_done[i])
+            {
+                _skipped++;
+                Refresh();
+            }
+            _shown[i] = active;
+        }
+    }
+
+    int Current()
+    {
+        for (int i = 0; i &lt; guides.Length; i++)
+            if (guides[i].activeSelf)
+                return i;
+        return -1;
+    }
+
+    void Refresh()
+    {
+        status.text = _waiting ? &quot;Timeline: WAITING for your click&quot; : &quot;Timeline: PLAYING&quot;;
+        score.SetText(&quot;Done: {0}   Skipped: {1}   Wrong: {2}&quot;, _doneCount, _skipped, _wrong);
+    }
+}</code></pre>
+<table>
+<tr><th>行</th><th>していること</th></tr>
+<tr><td>8</td><td><code>[RequireComponent(typeof(PlayableDirector))]</code>：同じ GameObject に Playable Director を必ず付けます。止めたり続けたりする相手が、Timeline を再生している Director だからです</td></tr>
+<tr><td>11〜13</td><td>Inspector で結ぶ 3 つです。<code>guides</code> は案内（Guide_1〜3）の並び、<code>status</code> は「PLAYING / WAITING」の文字、<code>score</code> は Done・Skipped・Wrong の文字です</td></tr>
+<tr><td>15〜18</td><td>内部の記録です。案内ごとに「出たことがあるか（<code>_shown</code>）」「答えたか（<code>_done</code>）」、いま止まっているか（<code>_waiting</code>）、3 つの数（<code>_doneCount</code>・<code>_skipped</code>・<code>_wrong</code>）を持ちます</td></tr>
+<tr><td>22〜28</td><td><code>Awake</code>：最初に 1 回だけ呼ばれ、Director を取り出し、記録の配列を案内の数だけ作ります</td></tr>
+<tr><td>30〜38</td><td><code>Wait()</code>：Signal Receiver から呼ばれます。いま出ている案内がない、または答え済みなら何もしません。そうでなければ <code>Pause()</code> で Timeline を止め、<code>_waiting</code> を立てます</td></tr>
+<tr><td>40〜55</td><td><code>Answer(index)</code>：ボタンから、案内の番号つきで呼ばれます。いまの案内と合っていて、まだ答えていなければ Done を増やし、止まっていれば <code>Resume()</code> で続けます。合っていなければ Wrong を増やします</td></tr>
+<tr><td>57〜69</td><td><code>LateUpdate</code>：毎フレーム、案内ごとに「出たことがあるのに、いまは消えていて、答えていない」を探し、見つけたら Skipped を増やします。Timeline が案内を消した後に調べたいので、<code>Update</code> ではなく <code>LateUpdate</code> です</td></tr>
+<tr><td>71〜77</td><td><code>Current()</code>：いま出ている案内の番号を、先頭から探して返します。1 つも出ていなければ <code>-1</code> を返します</td></tr>
+<tr><td>79〜83</td><td><code>Refresh()</code>：status と score の文字を作り直します。数字の部分は、毎回文字列を作らずに済む <code>SetText</code> で書き換えます</td></tr>
+</table>
+
+<h3>PulseScale.cs：拡縮の仕組み</h3>
+<p class="path">Assets/Lessons/H05_GuideAttention/Scripts/PulseScale.cs ／ Ex07</p>
+<p>15 行ほどの短いスクリプトです。Ex01 では録画で作った拡縮を、ここではコードで作っています。</p>
+<pre><code>using UnityEngine;
+
+/// 1 → maxScale → 1 と、period 秒で 1 回、拡大と縮小を繰り返す。
+public class PulseScale : MonoBehaviour
+{
+    public float maxScale = 1.3f;
+    public float period = 0.6f;
+
+    void Update()
+    {
+        float t = 0.5f - 0.5f * Mathf.Cos(Time.time * 2f * Mathf.PI / Mathf.Max(period, 0.1f));
+        float s = Mathf.Lerp(1f, maxScale, t);
+        transform.localScale = new Vector3(s, s, 1f);
+    }
+}</code></pre>
+<table>
+<tr><th>行</th><th>していること</th></tr>
+<tr><td>6・7</td><td><code>maxScale</code> と <code>period</code>：Inspector で変える 2 つの値です（Ex07 の Max Scale と Period）</td></tr>
+<tr><td>9〜14</td><td><code>Update</code>：毎フレームの動きです。<code>Mathf.Cos</code> は、時間に合わせて 1 → -1 → 1 と往復する値なので、<code>0.5f - 0.5f * cos</code> と置くと、0 → 1 → 0 と往復する t になります。<code>Time.time</code> は Play してからの秒数で、<code>period</code> 秒で 1 周するように 2π を掛けて割っています</td></tr>
+<tr><td>11</td><td><code>Mathf.Max(period, 0.1f)</code>：Period に 0 が入ると割り算で壊れるので、0.1 より小さくならないようにしています</td></tr>
+<tr><td>12</td><td><code>Mathf.Lerp(1f, maxScale, t)</code>：t が 0 のとき 1、1 のとき <code>maxScale</code>、その間は割合で混ぜた値を返します</td></tr>
+<tr><td>13</td><td><code>transform.localScale</code>：物の大きさ（Scale）に入れます。X と Y を同じ倍率にして、Z は 1 のままです</td></tr>
+</table>
+<p>録画で作った動き（Ex01）と、コードで作った動き（Ex07）は、どちらも Scale を変えているだけです。録画は目で見ながら作りやすく、コードは数字を Inspector で変えやすいという違いがあります。</p>
+
+<h3>ほかの 6 本</h3>
+<p>授業では読みません。作例の動きと見比べながら、必要なときに開きます。</p>
+<details class="hint">
+<summary>ScaleReadout.cs（Ex01：Scale の表示）</summary>
+<pre><code>using TMPro;
+using UnityEngine;
+
+/// target の大きさ（Scale の X）と、Play してからの最大値を表示する。
+public class ScaleReadout : MonoBehaviour
+{
+    public Transform target;
+    public TMP_Text label;
+    float _max;
+
+    void LateUpdate()   // アニメーションが値を書いた後に読む
+    {
+        float now = target.localScale.x;
+        _max = Mathf.Max(_max, now);
+        label.SetText(&quot;Scale x{0:2}   (max {1:2})&quot;, now, _max);
+    }
+}</code></pre>
+</details>
+<details class="hint">
+<summary>SearchGame.cs（Ex02：探すゲーム）</summary>
+<pre><code>using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+/// 上に出た名前のアイコンを探して押すゲーム。見つけるまでの秒数を測る。
+/// - blinkAll オン : 9 個すべてが点滅する
+/// - blinkAll オフ : 探すアイコン 1 個だけが点滅する
+/// 1 回目は練習として、平均（Avg）に入れない。blinkAll を変えると記録は最初からになる。
+public class SearchGame : MonoBehaviour
+{
+    public bool blinkAll = true;
+    public float blinkPeriod = 0.5f;   // 点滅 1 回の秒数
+    public Image[] icons;
+    public TMP_Text[] names;           // アイコンの文字（icons と同じ順）
+    public TMP_Text findLabel;
+    public TMP_Text score;
+    public TMP_Text modeLabel;
+    public Color normalColor = new Color(0.28f, 0.42f, 0.62f);
+    public Color litColor = new Color(1f, 0.85f, 0.3f);
+
+    static readonly string[] Words = { &quot;GACHA&quot;, &quot;NEWS&quot;, &quot;EVENT&quot;, &quot;LOGIN&quot;, &quot;SHOP&quot;, &quot;MAIL&quot;, &quot;GIFT&quot;, &quot;QUEST&quot;, &quot;RANK&quot; };
+    readonly int[] _order = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+    int _target, _found, _miss;
+    float _shownAt, _total;
+    bool _mode;
+
+    public int Target =&gt; _target;   // 探すアイコンの番号
+
+    void Start() { ResetGame(); }
+
+    void Update()
+    {
+        if (blinkAll != _mode)
+            ResetGame();
+        float t = Mathf.PingPong(Time.time * 2f / Mathf.Max(blinkPeriod, 0.1f), 1f);
+        for (int i = 0; i &lt; icons.Length; i++)
+            icons[i].color = blinkAll || i == _target ? Color.Lerp(normalColor, litColor, t) : normalColor;
+        modeLabel.text = blinkAll ? &quot;Blink All: ON   (9 icons)&quot; : &quot;Blink All: OFF   (1 icon)&quot;;
+    }
+
+    // Button の On Click () から、アイコンの番号つきで呼ばれる
+    public void Press(int index)
+    {
+        if (index != _target)
+        {
+            _miss++;
+            score.text = $&quot;Not here   Miss: {_miss}&quot;;
+            return;
+        }
+        float last = Time.time - _shownAt;
+        _found++;
+        if (_found &gt; 1)
+            _total += last;
+        score.text = _found == 1
+            ? &quot;Practice done. Keep going!&quot;
+            : $&quot;Last {last:0.00} s   Avg {_total / (_found - 1):0.00} s ({_found - 1})   Miss: {_miss}&quot;;
+        NextRound();
+    }
+
+    void ResetGame()
+    {
+        _mode = blinkAll;
+        _found = _miss = 0;
+        _total = 0f;
+        score.text = &quot;Press the icon&quot;;
+        NextRound();
+    }
+
+    void NextRound()
+    {
+        for (int i = _order.Length - 1; i &gt; 0; i--)   // 名前の並びを毎回かき混ぜる
+        {
+            int j = Random.Range(0, i + 1);
+            (_order[i], _order[j]) = (_order[j], _order[i]);
+        }
+        for (int i = 0; i &lt; names.Length; i++)
+            names[i].text = Words[_order[i]];
+        _target = Random.Range(0, icons.Length);
+        findLabel.text = &quot;Find: &quot; + Words[_order[_target]];
+        _shownAt = Time.time;
+    }
+}</code></pre>
+</details>
+<details class="hint">
+<summary>ControlsQuiz.cs（Ex03：覚えるクイズ）</summary>
+<pre><code>using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+/// 6 つの操作（キー）を覚えて押すクイズ。押し間違い（Miss）を数える。
+/// - teachAll オン : 6 つを一度に readTime 秒見せて、その後で 6 問聞く
+/// - teachAll オフ : 1 問ごとに、その操作だけを hintTime 秒見せてから聞く
+/// 1 問につきキーは 1 回だけ。間違えても次の問題へ進む。
+[RequireComponent(typeof(PlayerInput))]
+public class ControlsQuiz : MonoBehaviour
+{
+    public bool teachAll = true;
+    public float readTime = 6f;
+    public float hintTime = 1.5f;
+    public TMP_Text teachLabel;
+    public TMP_Text askLabel;
+    public TMP_Text score;
+    public TMP_Text modeLabel;
+
+    static readonly string[] Names = { &quot;JUMP&quot;, &quot;ATTACK&quot;, &quot;GUARD&quot;, &quot;HEAL&quot;, &quot;DASH&quot;, &quot;MAP&quot; };
+    static readonly string[] Keys = { &quot;F&quot;, &quot;K&quot;, &quot;D&quot;, &quot;J&quot;, &quot;S&quot;, &quot;L&quot; };
+    readonly int[] _order = { 0, 1, 2, 3, 4, 5 };
+    int _index, _miss;
+    float _until = -1f;      // 覚える時間の終わり（-1 = 覚える時間ではない）
+    bool _asking;
+
+    public int Miss =&gt; _miss;
+    public bool Asking =&gt; _asking;
+    public int Current =&gt; _order[Mathf.Min(_index, _order.Length - 1)];   // いまの問題の番号
+
+    void Update()
+    {
+        modeLabel.text = teachAll ? &quot;Teach All: ON   (6 at once)&quot; : &quot;Teach All: OFF   (1 at a time)&quot;;
+        if (_until &gt;= 0f &amp;&amp; Time.time &gt;= _until)
+            Ask();
+    }
+
+    // START ボタンの On Click () から呼ばれる
+    public void StartQuiz()
+    {
+        for (int i = _order.Length - 1; i &gt; 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (_order[i], _order[j]) = (_order[j], _order[i]);
+        }
+        _index = _miss = 0;
+        score.text = &quot;Miss: 0 / 6&quot;;
+        if (teachAll)
+        {
+            var sb = new System.Text.StringBuilder();   // START を押したときだけ
+            for (int i = 0; i &lt; Names.Length; i++)
+                sb.Append(Names[i]).Append(&quot; = &quot;).Append(Keys[i]).Append(&#x27;\n&#x27;);
+            Teach(sb.ToString(), readTime);
+        }
+        else
+            TeachOne();
+    }
+
+    void TeachOne() { Teach(Names[Current] + &quot; = &quot; + Keys[Current], hintTime); }
+
+    void Teach(string text, float seconds)
+    {
+        _asking = false;
+        teachLabel.text = text;
+        askLabel.text = &quot;Remember...&quot;;
+        _until = Time.time + seconds;
+    }
+
+    void Ask()
+    {
+        _until = -1f;
+        _asking = true;
+        teachLabel.text = &quot;&quot;;
+        askLabel.text = Names[Current] + &quot; !&quot;;
+    }
+
+    void Answer(int key)
+    {
+        if (!_asking)
+            return;
+        if (key != Current)
+            _miss++;
+        score.text = $&quot;Miss: {_miss} / 6&quot;;
+        _index++;
+        if (_index &gt;= _order.Length)
+        {
+            _asking = false;
+            askLabel.text = &quot;Finished&quot;;
+        }
+        else if (teachAll)
+            Ask();
+        else
+            TeachOne();
+    }
+
+    // Player Input（Send Messages）が「On + アクション名」で呼ぶ
+    void OnJump(InputValue value) { Answer(0); }
+    void OnAttack(InputValue value) { Answer(1); }
+    void OnGuard(InputValue value) { Answer(2); }
+    void OnHeal(InputValue value) { Answer(3); }
+    void OnDash(InputValue value) { Answer(4); }
+    void OnMap(InputValue value) { Answer(5); }
+}</code></pre>
+</details>
+<details class="hint">
+<summary>VisibleCount.cs（Ex04・Ex05・Ex08：案内の数を数える）</summary>
+<pre><code>using TMPro;
+using UnityEngine;
+
+/// いま出ている案内の数（Visible）と、同時に出た最大の数（Max）を表示する。
+public class VisibleCount : MonoBehaviour
+{
+    public GameObject[] targets;
+    public TMP_Text label;
+    int _max;
+
+    public int Max =&gt; _max;
+
+    void LateUpdate()   // Timeline が出し入れした後に数える
+    {
+        int now = 0;
+        for (int i = 0; i &lt; targets.Length; i++)
+            if (targets[i].activeSelf)
+                now++;
+        _max = Mathf.Max(_max, now);
+        label.SetText(&quot;Time {0:1} s   Visible: {1}   Max: {2}&quot;, Time.timeSinceLevelLoad, now, _max);
+    }
+}</code></pre>
+</details>
+<details class="hint">
+<summary>HudMode.cs（Ex06：HUD の出し入れ）</summary>
+<pre><code>using TMPro;
+using UnityEngine;
+
+/// 探索（EXPLORE）と戦闘（BATTLE）を切り替え、HUD の出し入れを Animator に伝える。
+/// hideInExplore をオンにすると、探索中は HUD を隠す。
+public class HudMode : MonoBehaviour
+{
+    public bool hideInExplore = false;
+    public Animator hudAnimator;
+    public CanvasGroup hud;
+    public TMP_Text modeLabel;
+    public TMP_Text readout;
+    public TMP_Text buttonLabel;
+
+    static readonly int VisibleId = Animator.StringToHash(&quot;Visible&quot;);
+    bool _battle;
+
+    // ModeButton の On Click () から呼ばれる
+    public void ToggleBattle() { _battle = !_battle; }
+
+    void Update()
+    {
+        hudAnimator.SetBool(VisibleId, _battle || !hideInExplore);
+        modeLabel.text = _battle ? &quot;BATTLE&quot; : &quot;EXPLORE&quot;;
+        buttonLabel.text = _battle ? &quot;BACK TO EXPLORE&quot; : &quot;BATTLE&quot;;
+    }
+
+    void LateUpdate() { readout.SetText(&quot;HUD Alpha {0:2}&quot;, hud.alpha); }
+}</code></pre>
+</details>
+<details class="hint">
+<summary>Spotlight.cs（Ex07：まわりを暗くする）</summary>
+<pre><code>using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+/// target のまわりを 4 枚の黒い板で覆って暗くする（スポットライト）。
+/// - dim     : 暗さ（0 で何もしない、1 で真っ黒）
+/// - padding : target の外側にあける余白（px）
+public class Spotlight : MonoBehaviour
+{
+    [Range(0f, 1f)] public float dim = 0f;
+    public float padding = 30f;
+    public RectTransform target;          // 親が同じ Canvas で、中央アンカーのもの
+    public Image top, bottom, left, right;
+    public PulseScale pulse;
+    public TMP_Text readout;
+
+    void LateUpdate()
+    {
+        Rect area = ((RectTransform)transform).rect;
+        Vector2 c = target.anchoredPosition;
+        Vector2 half = target.sizeDelta * 0.5f + new Vector2(padding, padding);
+        float xMin = c.x - half.x, xMax = c.x + half.x, yMin = c.y - half.y, yMax = c.y + half.y;
+        Set(top, area.xMin, yMax, area.xMax, area.yMax);
+        Set(bottom, area.xMin, area.yMin, area.xMax, yMin);
+        Set(left, area.xMin, yMin, xMin, yMax);
+        Set(right, xMax, yMin, area.xMax, yMax);
+        readout.SetText(&quot;Dim {0:2}   Scale x{1:2}   Period {2:2} s&quot;, dim, pulse.maxScale, pulse.period);
+    }
+
+    void Set(Image image, float x0, float y0, float x1, float y1)
+    {
+        var rt = image.rectTransform;         // アンカーと Pivot は中央（Builder が設定）
+        rt.sizeDelta = new Vector2(x1 - x0, y1 - y0);
+        rt.anchoredPosition = new Vector2((x0 + x1) * 0.5f, (y0 + y1) * 0.5f);
+        image.color = new Color(0f, 0f, 0f, dim);
+    }
+}</code></pre>
+</details>
+
+<h2 id="ch6">6. やってみよう：自分のホーム画面に案内を並べる</h2>
+<p>ここまでの道具を使って、自分のホーム画面に、3 つの案内を 10 秒以内に、1 つずつ並べます。素材は Ex08_Start（作業場）と、見本の Ex08_Example（作者の一例）の 2 つです。</p>
+
+<h3>作者の一例：Ex08_Example</h3>
+<p class="path">Assets/Lessons/H05_GuideAttention/Scenes/Ex08_Example.unity ／ Guide</p>
+<p>Ex05 で作った「止める」と、Ex01 の「光る枠」を、戦闘画面に重ねた一例です。案内は 3 つで、戦闘で最初に押すボタンから順に出て、出るたびに止まります。画面の上には、<strong>AUTHOR'S EXAMPLE</strong> の赤い帯が出ます。見本の文や秒数は、あえて書きません。見て、決め方の手がかりだけを持ち帰ります。</p>
+<figure>
+<img src="images/ex08_game_example.png" alt="Ex08_Example の Game ビュー。上に赤い帯の AUTHOR&#x27;S EXAMPLE - DO NOT SUBMIT。Time 3.3 s Visible: 1 Max: 1、Timeline: WAITING for your click。中央に ENEMY、下に ATTACK・GUARD・ITEM。ATTACK の上に案内 Hit first: ATTACK、ATTACK は黄色い枠" loading="lazy">
+<figcaption>作者の一例。戦闘画面で、案内と枠が出て止まっています。上の赤い帯は、見本であることを示します</figcaption>
+</figure>
+<figure>
+<video controls muted loop playsinline preload="metadata" src="videos/ex08_example.mp4" title="戦闘画面で、案内が 1 つずつ出るたびに止まり、押すと次の案内が出る"></video>
+<figcaption>案内が出て止まり、押すと次へ進みます（動画は無音です）</figcaption>
+</figure>
+<p class="label">決め方の手がかり</p>
+<ul>
+<li>案内は、プレイヤーが最初に困ることから、次に、最後に、の順に決めます</li>
+<li>3 つのクリップは重ならないようにします（Max: 1 になります）</li>
+<li>合計は 10 秒以内に収めます</li>
+</ul>
+<p class="note"><strong>Ex08_Example は見本です。提出には使えません。</strong>画面に AUTHOR'S EXAMPLE の帯が写った画像は 0 点です。前回の H04 でも、見本をそのまま提出する例が多くありました。提出するのは、あなたが Ex08_Start から作った自分のシーンです。</p>
+<p class="check"><strong>確認：</strong>Ex08_Example を開いて Play すると、案内が出るたびに止まり、合うボタンを押すと次の案内が出ることを確認します。</p>
+
+<h3>Ex08_Start を複製して、自分のシーンにする</h3>
+<p class="path">Assets/Lessons/H05_GuideAttention/Scenes/Ex08_Start.unity ／ MyGuide_学籍番号</p>
+<p>Ex08_Start はホーム画面で、QUEST・SHOP・PARTY・MAIL・MENU の 5 つのボタンと、まだ何も書かれていない 3 つの案内（Guide_A・B・C）があります。Timeline はまだありません。これを複製して、自分の名前をつけ、案内の順番と文を自分で決めます。</p>
+<p class="label">使うもの</p>
+<ul>
+<li>Guide_A・B・C：画面に置いてある 3 つの案内です。最初は隠れています（SetActive がオフ）</li>
+<li>NameTag：画面の上の「NAME: your student ID」の文字です。提出で自分のシーンだと分かるように、学籍番号に書き換えます</li>
+<li>Timeline の Create ボタン：Guide に Timeline のアセットと Playable Director をまとめて作ります</li>
+<li>VisibleCount：Readout の表示（Visible と Max）です</li>
+</ul>
+<figure>
+<img src="images/ex08_game_start.png" alt="Ex08_Start の Game ビュー。上に NAME: your student ID、Time 0.5 s Visible: 0 Max: 0。WELCOME の青い帯、下に QUEST・SHOP・PARTY・MAIL・MENU の 5 つのボタン。案内は出ていない" loading="lazy">
+<figcaption>Ex08_Start のホーム画面。案内はまだ出ていません。NAME は自分の学籍番号に書き換えます</figcaption>
+</figure>
+<p>まず自分で考えて手を動かし、詰まったところでヒントを 1 つずつ開いてみましょう。最後のヒントまで開けば、完成まで進められます。</p>
+
+<details class="hint">
+<summary>ヒント 1：何を作るのか</summary>
+<p>作るのは「自分のホーム画面の案内」です。プレイヤーがホーム画面で最初に困る順に、案内を 3 つ決めます。たとえば、最初に押してほしいボタン、次に押してほしいボタン、最後に気づいてほしいボタンです。</p>
+<p>文は英語かローマ字で書きます。Ex08_Example は、同じことを作者が戦闘画面でやってみた一例です。見本の文や秒数を写すと、あなたのホーム画面とは食い違います。</p>
+<p>10 秒以内に収めるのは、最初の 10 秒でプレイヤーに伝えることを絞るためです。3 つ全部を詰め込まず、強調は引き算という考え方を思い出します。</p>
+</details>
+
+<details class="hint">
+<summary>ヒント 2：Ex08_Start を複製して、名前を入れる</summary>
+<ol>
+<li>Project ウィンドウで <code>Assets/Lessons/H05_GuideAttention/Scenes</code> を開き、<code>Ex08_Start</code> を 1 回クリックして選びます</li>
+<li><kbd>Cmd</kbd> + <kbd>D</kbd>（Windows は <kbd>Ctrl</kbd> + <kbd>D</kbd>）を押して複製します。同じフォルダに、名前の末尾に番号の付いたシーンができます</li>
+<li>複製したシーンの名前を <code>MyGuide_学籍番号</code> に変えます（選んだ状態で <kbd>Return</kbd>、Windows は <kbd>F2</kbd>）</li>
+<li>複製したシーンをダブルクリックして開き、Hierarchy の一番上が <code>MyGuide_学籍番号</code> になっていることを確かめます</li>
+<li>Hierarchy で <code>Canvas</code> の左の三角をクリックして開き、<code>NameTag</code> をクリックします</li>
+<li>Inspector の <strong>Text</strong> の欄を、自分の学籍番号に書き換えます</li>
+</ol>
+<p>確認は、Game ビューの上に自分の学籍番号が出ることです。</p>
+</details>
+
+<details class="hint">
+<summary>ヒント 3：案内の文を、自分のものにする</summary>
+<ol>
+<li>Hierarchy で <code>Guide_A</code> をクリックします</li>
+<li>Inspector の左上のチェックを入れて、案内を見えるようにします</li>
+<li>Guide_A の左の三角を開き、<code>Text (TMP)</code> をクリックして、Inspector の Text の欄を、自分の案内の文（英語かローマ字）に書き換えます</li>
+<li>Scene ビューで <code>Guide_A</code> を、教えたいボタンの上に動かします（枠の <code>Frame</code> は案内の下に付いてきます）</li>
+<li><code>Guide_A</code> を選び直し、Inspector の左上のチェックを外して、元の隠れた状態に戻します</li>
+<li>Guide_B と Guide_C も同じように作ります</li>
+</ol>
+<p>3 つの案内は、プレイヤーが最初に困る順に決めます。文は短く、1 つの案内に 1 つのことだけを書きます。</p>
+</details>
+
+<details class="hint">
+<summary>ヒント 4：Timeline を作って、案内をドラッグする</summary>
+<ol>
+<li>Hierarchy で <code>Guide</code> をクリックします</li>
+<li>メニューバーの <strong>Window → Sequencing → Timeline</strong> をクリックします</li>
+<li>Timeline ウィンドウの <strong>Create</strong> ボタンをクリックします</li>
+<li>保存先を <code>Assets/Lessons/H05_GuideAttention/Timelines</code> にして、名前に <code>MyGuide_学籍番号</code> と入力し、<strong>Save</strong> をクリックします</li>
+<li>Hierarchy の <code>Guide_A</code> を、Timeline ウィンドウの左の空いている所へドラッグします</li>
+<li>メニューが出たら <strong>Activation Track</strong> を選びます</li>
+<li><code>Guide_B</code> と <code>Guide_C</code> も、同じようにドラッグして Activation Track にします</li>
+</ol>
+<p>確認は、Activation Track が 3 本でき、トラックの名前が Guide_A・Guide_B・Guide_C になることです。</p>
+<figure>
+<img src="images/ed08_create_timeline_crop.png" alt="Timeline ウィンドウの中央。To begin a new timeline with Guide, create a Director component and a Timeline asset という文と、その下の Create ボタン" loading="lazy">
+<figcaption>Guide を選ぶと、Timeline ウィンドウに Create が出ます</figcaption>
+</figure>
+<figure>
+<img src="images/ed08_timeline_mine_crop.png" alt="Timeline ウィンドウ（MyGuide_sample (Guide)）。Guide_A、Guide_B、Guide_C の 3 本のトラックに、クリップが 1 本ずつ、重ならずに階段状に並ぶ" loading="lazy">
+<figcaption>できあがりの例。クリップが重ならず、1 つずつ並びます（MyGuide_sample は撮影用のシーンで、配布には入っていません）</figcaption>
+</figure>
+</details>
+
+<details class="hint">
+<summary>ヒント 5：Start と Duration を決めて、確かめる</summary>
+<ol>
+<li>Guide_A のクリップをクリックし、Inspector の Clip Timing の <strong>Start</strong> と <strong>Duration</strong> の s の欄に、自分で決めた秒数を入力します</li>
+<li>Guide_B のクリップは、Guide_A が終わった後に始まるように、Start と Duration の s の欄を入力します</li>
+<li>Guide_C のクリップも、Guide_B が終わった後に始まるようにします</li>
+<li>3 つのクリップが重ならず、全部で 10 秒以内に収まっていることを、Timeline ウィンドウで見ます</li>
+<li>再生ヘッドをドラッグして、案内が 1 つずつ入れ替わるのを確かめます</li>
+<li><kbd>Cmd</kbd> + <kbd>S</kbd>（Windows は <kbd>Ctrl</kbd> + <kbd>S</kbd>）で保存します</li>
+<li>Play ボタンを押し、上の表示が <code>Max: 1</code> になることを確かめます</li>
+</ol>
+<p>Max が 2 以上になるときは、2 つのクリップが重なっています。Start と Duration を見直します。余裕があれば、案内の <code>Frame</code> に Animator を付け、Controller に Ex01 で作った StartButton を入れて、枠を光らせます。H05Stop の印を置いて、押すまで止める形にしてもかまいません。</p>
+<p><strong>提出するスクリーンショット ②</strong>：Hierarchy のシーン名（<code>MyGuide_学籍番号</code>）、Timeline ウィンドウ（クリップ 3 本）、Game ビュー（NAME に自分の学籍番号、自分の文の案内が 1 つ出ている）が 1 枚に写るように、エディタ全体を撮ります。Play 中でも、Timeline のプレビュー中でもかまいません。</p>
+<figure>
+<img src="images/ed08_submit_example_crop.png" alt="Unity エディタ全体。左に Hierarchy（一番上が MyGuide_sample）、中央に Game ビュー（NAME: sample と、QUEST の上の案内と枠）、右に Inspector の Playable Director、下に Timeline ウィンドウ（Guide_A・B・C のクリップ 3 本）" loading="lazy">
+<figcaption>提出②の見本。Hierarchy・Timeline・Game が 1 枚に写っています（NAME: sample は見本用で、自分の学籍番号に置き換え、案内の文も自分のものにします）</figcaption>
+</figure>
+</details>
+<p class="check"><strong>確認：</strong>自分のシーン <code>MyGuide_学籍番号</code> で Play すると、上の表示が <code>Max: 1</code> になり、NAME に自分の学籍番号、Game ビューに自分の文の案内が 1 つずつ出ることを確認します。</p>
+
+<h2 id="ch7">7. 注意の設計の現場</h2>
+<p>今日の作例は小さな画面ですが、同じ考え方は、実際のゲームでも使われています。ここでは、原理編 第5章で紹介されている事例から、HUD と、全部を光らせる画面の話を取り上げます。</p>
+
+<h3>HUD を引っ込める：God of War</h3>
+<p>『God of War』（2018 年版）には、設定で HUD を最小限にする没入モード（Immersion mode）があります。続編の『God of War Ragnarök』は、通常のプレイ中は HUD が隠れ、必要なときに現れる仕組みがあると、ゲームメディアが伝えています（公式の文書ではなく、報道に基づく情報です）。</p>
+<p>Ex06 では、探索中の HUD を隠し、戦闘に入ったら出しました。出す技術と同じくらい、引っ込める技術が、画面の情報の量を決めます。プレイヤーが設定で選べる形にすることも、1 つの方法です。</p>
+
+<h3>全部が点滅するホーム画面</h3>
+<p>お知らせ、イベント、ガチャ、ログインボーナスのバッジが、同時に明滅しているホーム画面を思い浮かべてみましょう。作り手は全部を見てほしいのですが、プレイヤーには、どれを先に見ればよいかが分かりません。Ex02 は、これを探す秒数で確かめた作例です。</p>
+<p>自分のホーム画面を作るときは、いちばん先に押してほしい所だけを立て、残りは静かにします。Ex08 で並べる 3 つの案内も、同じ考え方です。</p>
+
+<h3>見えているのに気づかない：見えないゴリラの実験</h3>
+<p>シモンズ（Simons）とチャブリス（Chabris）は、1999 年の実験で、パスの回数を数えている人たちの前を、ゴリラの着ぐるみが横切る映像を見せました。数えることに注意が向いていると、画面の真ん中を通ったゴリラに、気づかない人が多くいました。非注意性盲目（inattentional blindness）と呼ばれる現象です。</p>
+<p>画面に情報があることと、プレイヤーがそれを見ていることは、別のことです。今日の作例で、案内を 1 つずつ出して、押すまで止めたのは、見えているだけで終わらせないためです。</p>
+<p class="note">出典：原理編『UnityDesignPrinciples』第5章。実験は Simons, D. J., &amp; Chabris, C. F. (1999). Gorillas in our midst. <em>Perception</em>, 28(9), 1059–1074。保てる量の話は Cowan, N. (2001), <em>Behavioral and Brain Sciences</em>, 24(1), 87–114 と Miller, G. A. (1956), <em>Psychological Review</em>, 63(2), 81–97。God of War の没入モードは PSU と WCCFTech の記事、Ragnarök の HUD は GAMERANT の記事（二次資料）によります。</p>
+
+<h2 id="ch8">8. 提出とフォーム</h2>
+<p>提出物は 2 つで、両方そろって提出完了です（合計 100 点）。授業の途中で、数字を書き留めておくと、あとの記入が楽になります。</p>
+
+<h3>1. スクリーンショット 2 枚をファイルで添付（40 点）</h3>
+<p>Classroom の課題に、スクリーンショットを<strong>ファイルとして</strong>添付します。外部サイトのリンクにはしません。撮影は、macOS なら <kbd>Shift</kbd> + <kbd>Cmd</kbd> + <kbd>4</kbd>、Windows なら <kbd>Win</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd> で範囲を選びます。</p>
+<table>
+<tr><th>提出物</th><th>点</th><th>写すもの</th></tr>
+<tr><td>①</td><td>20</td><td><code>Ex05_SignalStop</code> のエディタ全体。Timeline ウィンドウ（Signal Receiver のトラックに Signal Emitter 3 つ）と Game ビュー（<code>Done: 3   Skipped: 0</code>）が 1 枚に一緒に写っていること。Title が「H05  Ex05  Signal Stop」であること（Ex05_Done は 0 点）</td></tr>
+<tr><td>②</td><td>20</td><td>自分のシーン <code>MyGuide_学籍番号</code> のエディタ全体。Hierarchy のシーン名、Timeline ウィンドウ（クリップ 3 本）、Game ビュー（NAME に自分の学籍番号、自分の文の案内が 1 つ出ている）が 1 枚に写っていること</td></tr>
+</table>
+<p class="note"><strong>AUTHOR'S EXAMPLE の帯が写った画像は 0 点です。</strong>Ex08_Example は見本なので、提出する画像に写らないようにします。</p>
+
+<h3>2. 演習記録フォーム 3 問（60 点、各 20 点）</h3>
+<p>Classroom の課題に添付されたフォームに答えます。3 問は三つの層に対応していて、授業中に書き留めた数字を、自分の言葉で結びます。</p>
+<table>
+<tr><th>問</th><th>層</th><th>書くこと</th></tr>
+<tr><td>①</td><td>体験の層</td><td>Ex02 の Avg（オン・オフ）と点滅するアイコンの数、Ex03 の Miss（オン・オフ）。この結果から、自分が遊んだゲームの画面で、何を 1 つに絞るとよいか</td></tr>
+<tr><td>②</td><td>情報の層</td><td>Ex04 で Start を変えたときの Max の変化、Ex05 で 1.5 以外の秒数に印を置いたときの見え方、Ex06 の HUD Alpha の変化と、隠すと何の負荷が減ると思うか</td></tr>
+<tr><td>③</td><td>見た目の層と、やってみよう</td><td>Ex07 で自分で決めた Dim・Max Scale・Period と見え方、自分の案内 A・B・C の順番と Start・Duration・文、最初に A を出した理由</td></tr>
+</table>
+<p>記入のときの注意を 3 つ書いておきます。</p>
+<ul>
+<li>秒数や数は、<strong>自分の画面に出た値</strong>を、そのまま書きます。Ex02 の Avg や Ex03 の Miss が下がらなかったときも、その数字を書き、なぜだと思うかを書きます</li>
+<li>Ex07 は、1.05 / 2 / 0.6 以外の、自分で決めた組を 1 つ必ず書きます</li>
+<li>フォームの記入例は、見本のシーン（Ex08_Example）の値と、作り話の秒数で書いてあります。記入例と同じ秒数・同じ文・戦闘画面の案内は 0 点です。自分のホーム画面とは、必ず食い違います</li>
+</ul>
+<table>
+<tr><th>作例</th><th>授業中に書き留めておく値</th></tr>
+<tr><td>Ex02</td><td>Avg（Blink All オン・オフ）</td></tr>
+<tr><td>Ex03</td><td>Miss（Teach All オン・オフ）</td></tr>
+<tr><td>Ex04</td><td>Guide_2 の Start（0 → 2）、Max（3 → 1）</td></tr>
+<tr><td>Ex05</td><td>試した印の Time と、案内の残り方</td></tr>
+<tr><td>Ex06</td><td>HUD Alpha（EXPLORE と BATTLE、オフとオン）</td></tr>
+<tr><td>Ex07</td><td>自分で決めた Dim・Max Scale・Period と、見え方</td></tr>
+<tr><td>Ex08</td><td>自分の案内 A・B・C の Start・Duration・文</td></tr>
+</table>
+
+<h2 id="ch9">9. まとめ</h2>
+<p>今日は、プレイヤーの注意を、見つけやすさ・覚えやすさ・出す順番・止まる所・強さに分けて、別々の数字で調整しました。</p>
+<ul>
+<li><strong>準備（Animation Clip・Animator・Timeline）</strong>：動きは、録画で作ってもコードで作っても、Scale を変えているだけです。Timeline が使えることを、最初に確かめました。</li>
+<li><strong>体験の層（Blink All・Teach All）</strong>：動くものが 9 個あると探す時間が延び、6 つを一度に教えると間違いが増えます。強調は引き算で、教えるのは使う場面の直前に 1 つずつです。</li>
+<li><strong>情報の層（Activation Track・Signal・Hide In Explore）</strong>：案内は Start をずらして 1 つずつ（Max: 3 → 1）出し、Signal で案内が出たところに止まり、押すと続きが流れる形にしました。いま要らない HUD は隠します（HUD Alpha 1.00 → 0.00）。</li>
+<li><strong>見た目の層（Dim・Max Scale・Period）</strong>：まわりを暗くすれば（Dim 0.6）、動きを小さくゆっくり（x1.05・2 秒）しても、QUEST は目に入ります。何度も見る画面ほど、強すぎない演出にします。</li>
+</ul>
+<p>案内を出す順番と止める所を決めるのは、プレイヤーが最初に困ることから考える作業でした。自分のホーム画面で並べた 3 つの案内も、その順になっているかを、もう一度見直してみましょう。</p>
+
+<footer>
+<p>レベルデザイン基礎 2026 後期 演習 H05 ／ 参考：原理編『UnityDesignPrinciples』第5章</p>
+</footer>
+
+</main>
+</body>
+</html>
